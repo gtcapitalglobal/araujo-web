@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   LayoutDashboard, Users, Briefcase, DollarSign, FolderOpen,
   Car, HardHat, BookOpen, Building2, Settings, CheckSquare, LogOut, Menu, X,
-  MessageSquare, Calendar, StickyNote, Bell, BarChart3, RefreshCw, Receipt
+  MessageSquare, Calendar, StickyNote, Bell, BarChart3, RefreshCw, Receipt, Link2
 } from "lucide-react";
 import { useState } from "react";
 
@@ -22,6 +22,7 @@ const navItems = [
   { href: "/admin/mileage", icon: Car, label: "Quilometragem" },
   { href: "/admin/helpers", icon: HardHat, label: "Ajudantes" },
   { href: "/admin/files", icon: FolderOpen, label: "Arquivos" },
+  { href: "/admin/docs", icon: Link2, label: "Documentos" },
   { href: "/admin/notes", icon: StickyNote, label: "Notas" },
   { href: "/admin/reminders", icon: Bell, label: "Lembretes" },
   { href: "/admin/checklist", icon: CheckSquare, label: "Checklist" },
