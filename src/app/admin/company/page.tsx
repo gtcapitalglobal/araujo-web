@@ -265,21 +265,31 @@ export default function CompanyPage() {
           onClick={() => {
             const lines = [
               `*${form.legal_name || "Araujo Company LLC"}*`,
-              form.ein ? `EIN: ${form.ein}` : "",
-              form.phone ? `📱 ${form.phone}` : "",
-              form.email ? `📧 ${form.email}` : "",
-              form.address_line1 ? `📍 ${form.address_line1}` : "",
-              form.website ? `🕐 ${form.website}` : "",
-              form.bank_name ? `🏦 ${form.bank_name}` : "",
-              form.zelle ? `💰 Zelle: ${form.zelle}` : "",
-              "",
-              "araujocompany.com",
-            ].filter(Boolean).join("\n");
+              `Dados para pagamento:`,
+              `👉 https://www.araujocompany.com/pay`,
+            ].join("\n");
             window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
           }}
           className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold px-6 py-3 rounded-xl transition"
         >
-          <Share2 size={18} /> Enviar via WhatsApp
+          <Share2 size={18} /> Enviar Pagamento via WhatsApp
+        </button>
+        <button
+          onClick={() => {
+            const lines = [
+              `*${form.legal_name || "Araujo Company LLC"}*`,
+              form.phone ? `📱 ${form.phone}` : "",
+              form.email ? `📧 ${form.email}` : "",
+              form.address_line1 ? `📍 ${form.address_line1}` : "",
+              form.website ? `🕐 ${form.website}` : "",
+              "",
+              "🌐 araujocompany.com",
+            ].filter(Boolean).join("\n");
+            window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
+          }}
+          className="flex items-center gap-2 bg-surface border border-border text-text-secondary hover:text-text font-bold px-6 py-3 rounded-xl transition"
+        >
+          <Share2 size={18} /> Enviar Dados da Empresa
         </button>
         {saved && <span className="text-success text-sm font-semibold">Salvo com sucesso!</span>}
       </div>
