@@ -6,23 +6,29 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
   LayoutDashboard, Users, Briefcase, DollarSign, FolderOpen,
-  Car, HardHat, BookOpen, Building2, Settings, CheckSquare, LogOut, Menu, X, MessageSquare
+  Car, HardHat, BookOpen, Building2, Settings, CheckSquare, LogOut, Menu, X,
+  MessageSquare, Calendar, StickyNote, Bell, BarChart3, RefreshCw
 } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
-  { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/admin", icon: LayoutDashboard, label: "Painel" },
   { href: "/admin/quotes", icon: MessageSquare, label: "Orcamentos" },
+  { href: "/admin/calendar", icon: Calendar, label: "Calendario" },
   { href: "/admin/clients", icon: Users, label: "Clientes" },
-  { href: "/admin/jobs", icon: Briefcase, label: "Jobs" },
-  { href: "/admin/money", icon: DollarSign, label: "Dinheiro" },
+  { href: "/admin/jobs", icon: Briefcase, label: "Servicos" },
+  { href: "/admin/money", icon: DollarSign, label: "Financeiro" },
+  { href: "/admin/recurring", icon: RefreshCw, label: "Recorrentes" },
+  { href: "/admin/mileage", icon: Car, label: "Quilometragem" },
+  { href: "/admin/helpers", icon: HardHat, label: "Ajudantes" },
   { href: "/admin/files", icon: FolderOpen, label: "Arquivos" },
-  { href: "/admin/mileage", icon: Car, label: "Mileage" },
-  { href: "/admin/helpers", icon: HardHat, label: "Helpers" },
+  { href: "/admin/notes", icon: StickyNote, label: "Notas" },
+  { href: "/admin/reminders", icon: Bell, label: "Lembretes" },
   { href: "/admin/checklist", icon: CheckSquare, label: "Checklist" },
-  { href: "/admin/knowledge", icon: BookOpen, label: "Knowledge" },
+  { href: "/admin/reports", icon: BarChart3, label: "Relatorios" },
+  { href: "/admin/knowledge", icon: BookOpen, label: "Conhecimento" },
   { href: "/admin/company", icon: Building2, label: "Empresa" },
-  { href: "/admin/settings", icon: Settings, label: "Settings" },
+  { href: "/admin/settings", icon: Settings, label: "Ajustes" },
 ];
 
 export default function Sidebar() {

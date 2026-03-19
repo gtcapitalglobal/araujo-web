@@ -1,81 +1,167 @@
-import { createClient } from "@/lib/supabase/server";
-import { DollarSign, Briefcase, Users, Car } from "lucide-react";
+"use client";
 
-async function getStats(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const monthStart = `${year}-${String(month).padStart(2, "0")}-01`;
-  const nextMonth = month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, "0")}-01`;
+import { useEffect, useState, useCallback } from "react";
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+import {
+  DollarSign, Briefcase, Users, Car, MessageSquare, Bell,
+  Plus, ArrowRight, Clock, CheckCircle, AlertTriangle, StickyNote
+} from "lucide-react";
 
-  const [clients, jobs, income, expenses, mileage] = await Promise.all([
-    supabase.from("clients").select("id", { count: "exact", head: true }),
-    supabase.from("jobs").select("id", { count: "exact", head: true }).neq("status", "cancelled"),
-    supabase.from("money_entries").select("amount").eq("kind", "income").gte("date", monthStart).lt("date", nextMonth),
-    supabase.from("money_entries").select("amount").eq("kind", "expense").gte("date", monthStart).lt("date", nextMonth),
-    supabase.from("mileage_logs").select("miles").gte("date", `${year}-01-01`),
-  ]);
-
-  const totalIncome = income.data?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
-  const totalExpenses = expenses.data?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
-  const totalMiles = mileage.data?.reduce((s, e) => s + (e.miles || 0), 0) || 0;
-
-  return {
-    clientCount: clients.count || 0,
-    jobCount: jobs.count || 0,
-    monthIncome: totalIncome,
-    monthExpenses: totalExpenses,
-    monthProfit: totalIncome - totalExpenses,
-    yearMiles: totalMiles,
-  };
+interface DashboardData {
+  monthIncome: number;
+  monthExpenses: number;
+  monthProfit: number;
+  jobCount: number;
+  clientCount: number;
+  yearMiles: number;
+  newQuotes: number;
+  pendingReminders: number;
+  todayJobs: { id: string; title: string; status: string }[];
+  recentQuotes: { id: string; name: string; service: string | null; created_at: string }[];
+  upcomingReminders: { id: string; title: string; due_date: string; is_done: boolean }[];
+  recentMoney: { id: string; kind: string; category: string | null; amount: number; date: string }[];
+  pinnedNotes: { id: string; title: string | null; content: string | null }[];
 }
 
-export default async function AdminDashboard() {
-  const supabase = await createClient();
-  const stats = await getStats(supabase);
+export default function AdminDashboard() {
+  const supabase = createClient();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [greeting, setGreeting] = useState("");
 
-  const { data: recentJobs } = await supabase
-    .from("jobs")
-    .select("id, title, status, estimate_amount, created_at")
-    .order("created_at", { ascending: false })
-    .limit(5);
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Bom dia");
+    else if (hour < 18) setGreeting("Boa tarde");
+    else setGreeting("Boa noite");
+  }, []);
 
-  const { data: recentMoney } = await supabase
-    .from("money_entries")
-    .select("id, kind, category, amount, date")
-    .order("date", { ascending: false })
-    .limit(5);
+  const fetchData = useCallback(async () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const monthStart = `${year}-${String(month).padStart(2, "0")}-01`;
+    const nextMonth = month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, "0")}-01`;
+    const today = now.toISOString().split("T")[0];
 
-  const cards = [
-    { label: "Receita do Mes", value: `$${stats.monthIncome.toFixed(2)}`, icon: DollarSign, color: "text-money-in", bg: "bg-money-in/10", border: "border-money-in/30" },
-    { label: "Despesas do Mes", value: `$${stats.monthExpenses.toFixed(2)}`, icon: DollarSign, color: "text-money-out", bg: "bg-money-out/10", border: "border-money-out/30" },
-    { label: "Lucro do Mes", value: `$${stats.monthProfit.toFixed(2)}`, icon: DollarSign, color: "text-profit", bg: "bg-profit/10", border: "border-profit/30" },
-    { label: "Jobs Ativos", value: stats.jobCount.toString(), icon: Briefcase, color: "text-secondary", bg: "bg-secondary/10", border: "border-secondary/30" },
-    { label: "Clientes", value: stats.clientCount.toString(), icon: Users, color: "text-primary-light", bg: "bg-primary/10", border: "border-primary/30" },
-    { label: "Miles (Ano)", value: stats.yearMiles.toFixed(1), icon: Car, color: "text-accent", bg: "bg-accent/10", border: "border-accent/30" },
-  ];
+    const [
+      clientsRes, jobsRes, incomeRes, expensesRes, mileageRes,
+      quotesCountRes, remindersCountRes, todayJobsRes, recentQuotesRes,
+      upcomingRemindersRes, recentMoneyRes, pinnedNotesRes
+    ] = await Promise.all([
+      supabase.from("clients").select("id", { count: "exact", head: true }),
+      supabase.from("jobs").select("id", { count: "exact", head: true }).neq("status", "cancelled"),
+      supabase.from("money_entries").select("amount").eq("kind", "income").gte("date", monthStart).lt("date", nextMonth),
+      supabase.from("money_entries").select("amount").eq("kind", "expense").gte("date", monthStart).lt("date", nextMonth),
+      supabase.from("mileage_logs").select("miles").gte("date", `${year}-01-01`),
+      supabase.from("quote_requests").select("id", { count: "exact", head: true }).eq("status", "new"),
+      supabase.from("reminders").select("id", { count: "exact", head: true }).eq("is_done", false).lte("due_date", now.toISOString()),
+      supabase.from("jobs").select("id, title, status").gte("start_date", today).lte("start_date", today).limit(5),
+      supabase.from("quote_requests").select("id, name, service, created_at").order("created_at", { ascending: false }).limit(5),
+      supabase.from("reminders").select("id, title, due_date, is_done").eq("is_done", false).order("due_date").limit(5),
+      supabase.from("money_entries").select("id, kind, category, amount, date").order("date", { ascending: false }).limit(5),
+      supabase.from("notes").select("id, title, content").eq("pinned", true).limit(3),
+    ]);
+
+    const totalIncome = incomeRes.data?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
+    const totalExpenses = expensesRes.data?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
+    const totalMiles = mileageRes.data?.reduce((s, e) => s + (e.miles || 0), 0) || 0;
+
+    setData({
+      monthIncome: totalIncome,
+      monthExpenses: totalExpenses,
+      monthProfit: totalIncome - totalExpenses,
+      jobCount: jobsRes.count || 0,
+      clientCount: clientsRes.count || 0,
+      yearMiles: totalMiles,
+      newQuotes: quotesCountRes.count || 0,
+      pendingReminders: remindersCountRes.count || 0,
+      todayJobs: todayJobsRes.data || [],
+      recentQuotes: recentQuotesRes.data || [],
+      upcomingReminders: upcomingRemindersRes.data || [],
+      recentMoney: recentMoneyRes.data || [],
+      pinnedNotes: pinnedNotesRes.data || [],
+    });
+    setLoading(false);
+  }, [supabase]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  if (loading) return <div className="text-center py-20 text-text-muted">Carregando...</div>;
+  if (!data) return null;
 
   const statusColors: Record<string, string> = {
-    lead: "bg-text-muted/20 text-text-muted",
-    estimated: "bg-warning/20 text-warning",
-    scheduled: "bg-secondary/20 text-secondary",
-    in_progress: "bg-primary/20 text-primary-light",
-    completed: "bg-success/20 text-success",
-    invoiced: "bg-accent/20 text-accent",
-    paid: "bg-money-in/20 text-money-in",
-    cancelled: "bg-error/20 text-error",
+    lead: "bg-text-muted/20 text-text-muted", estimated: "bg-warning/20 text-warning",
+    scheduled: "bg-secondary/20 text-secondary", in_progress: "bg-primary/20 text-primary-light",
+    completed: "bg-success/20 text-success", invoiced: "bg-accent/20 text-accent",
+    paid: "bg-money-in/20 text-money-in", cancelled: "bg-error/20 text-error",
   };
+
+  const quickActions = [
+    { label: "Novo Cliente", href: "/admin/clients", icon: Users, color: "from-primary to-secondary" },
+    { label: "Novo Job", href: "/admin/jobs", icon: Briefcase, color: "from-secondary to-primary" },
+    { label: "Registrar Receita", href: "/admin/money", icon: DollarSign, color: "from-success to-success" },
+    { label: "Registrar Despesa", href: "/admin/money", icon: DollarSign, color: "from-error to-error" },
+    { label: "Registrar Milhas", href: "/admin/mileage", icon: Car, color: "from-accent to-legendary" },
+    { label: "Nova Nota", href: "/admin/notes", icon: StickyNote, color: "from-epic to-primary" },
+  ];
 
   return (
     <div>
-      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent mb-8">DASHBOARD</h1>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent">{greeting.toUpperCase()}, GUSTAVO!</h1>
+        <p className="text-text-muted text-sm mt-1">
+          {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+        </p>
+      </div>
+
+      {/* Alerts */}
+      {(data.newQuotes > 0 || data.pendingReminders > 0) && (
+        <div className="flex flex-wrap gap-3 mb-6">
+          {data.newQuotes > 0 && (
+            <Link href="/admin/quotes" className="flex items-center gap-2 bg-secondary/10 border border-secondary/30 text-secondary px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-secondary/20 transition">
+              <MessageSquare size={16} />
+              {data.newQuotes} orcamento{data.newQuotes > 1 ? "s" : ""} novo{data.newQuotes > 1 ? "s" : ""}
+              <ArrowRight size={14} />
+            </Link>
+          )}
+          {data.pendingReminders > 0 && (
+            <Link href="/admin/reminders" className="flex items-center gap-2 bg-warning/10 border border-warning/30 text-warning px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-warning/20 transition">
+              <AlertTriangle size={16} />
+              {data.pendingReminders} lembrete{data.pendingReminders > 1 ? "s" : ""} pendente{data.pendingReminders > 1 ? "s" : ""}
+              <ArrowRight size={14} />
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-8">
+        {quickActions.map((a) => (
+          <Link key={a.label} href={a.href} className="flex flex-col items-center gap-2 bg-surface border border-border rounded-2xl p-4 hover:border-primary/30 hover:-translate-y-0.5 transition-all group">
+            <div className={`w-10 h-10 bg-gradient-to-br ${a.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
+              <a.icon size={18} className="text-white" />
+            </div>
+            <span className="text-text-muted text-[10px] font-semibold text-center leading-tight">{a.label}</span>
+          </Link>
+        ))}
+      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {cards.map((c) => (
+        {[
+          { label: "Receita do Mes", value: `$${data.monthIncome.toFixed(2)}`, icon: DollarSign, color: "text-money-in", bg: "bg-money-in/10", border: "border-money-in/30" },
+          { label: "Despesas do Mes", value: `$${data.monthExpenses.toFixed(2)}`, icon: DollarSign, color: "text-money-out", bg: "bg-money-out/10", border: "border-money-out/30" },
+          { label: "Lucro do Mes", value: `$${data.monthProfit.toFixed(2)}`, icon: DollarSign, color: "text-profit", bg: "bg-profit/10", border: "border-profit/30" },
+          { label: "Jobs Ativos", value: data.jobCount.toString(), icon: Briefcase, color: "text-secondary", bg: "bg-secondary/10", border: "border-secondary/30" },
+          { label: "Clientes", value: data.clientCount.toString(), icon: Users, color: "text-primary-light", bg: "bg-primary/10", border: "border-primary/30" },
+          { label: "Milhas (Ano)", value: data.yearMiles.toFixed(0), icon: Car, color: "text-accent", bg: "bg-accent/10", border: "border-accent/30" },
+        ].map((c) => (
           <div key={c.label} className={`${c.bg} border ${c.border} rounded-2xl p-5`}>
             <div className="flex items-center gap-3 mb-2">
-              <c.icon size={20} className={c.color} />
+              <c.icon size={18} className={c.color} />
               <span className="text-text-muted text-xs font-medium">{c.label}</span>
             </div>
             <p className={`text-2xl font-black ${c.color}`}>{c.value}</p>
@@ -83,40 +169,100 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Recent Jobs */}
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        {/* Today's Jobs */}
         <div className="bg-surface border border-border rounded-2xl p-6">
-          <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider mb-4">JOBS RECENTES</h2>
-          {recentJobs && recentJobs.length > 0 ? (
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider">JOBS DE HOJE</h2>
+            <Link href="/admin/jobs" className="text-text-muted text-xs hover:text-secondary transition">Ver todos →</Link>
+          </div>
+          {data.todayJobs.length > 0 ? (
             <div className="space-y-3">
-              {recentJobs.map((job) => (
+              {data.todayJobs.map((job) => (
                 <div key={job.id} className="flex items-center justify-between bg-card rounded-xl p-3">
                   <div>
-                    <p className="text-sm font-semibold">{job.title}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[job.status] || "bg-text-muted/20 text-text-muted"}`}>
-                      {job.status}
-                    </span>
+                    <p className="text-sm font-semibold text-text">{job.title}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[job.status] || ""}`}>{job.status}</span>
                   </div>
-                  {job.estimate_amount && (
-                    <span className="text-accent font-bold text-sm">${job.estimate_amount}</span>
-                  )}
+                  <Clock size={14} className="text-text-muted" />
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-text-muted text-sm">Nenhum job ainda</p>
+            <p className="text-text-muted text-sm py-4 text-center">Nenhum job agendado para hoje</p>
+          )}
+        </div>
+
+        {/* Upcoming Reminders */}
+        <div className="bg-surface border border-border rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider">LEMBRETES</h2>
+            <Link href="/admin/reminders" className="text-text-muted text-xs hover:text-secondary transition">Ver todos →</Link>
+          </div>
+          {data.upcomingReminders.length > 0 ? (
+            <div className="space-y-3">
+              {data.upcomingReminders.map((r) => {
+                const isOverdue = new Date(r.due_date) < new Date();
+                return (
+                  <div key={r.id} className={`flex items-center justify-between bg-card rounded-xl p-3 ${isOverdue ? "border border-warning/30" : ""}`}>
+                    <div className="flex items-center gap-3">
+                      {isOverdue ? <AlertTriangle size={14} className="text-warning" /> : <Bell size={14} className="text-text-muted" />}
+                      <div>
+                        <p className="text-sm font-semibold text-text">{r.title}</p>
+                        <p className={`text-xs ${isOverdue ? "text-warning" : "text-text-muted"}`}>
+                          {new Date(r.due_date).toLocaleDateString("pt-BR")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <CheckCircle size={24} className="text-success mx-auto mb-2" />
+              <p className="text-text-muted text-sm">Tudo em dia!</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        {/* Recent Quotes */}
+        <div className="bg-surface border border-border rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider">ORCAMENTOS RECENTES</h2>
+            <Link href="/admin/quotes" className="text-text-muted text-xs hover:text-secondary transition">Ver todos →</Link>
+          </div>
+          {data.recentQuotes.length > 0 ? (
+            <div className="space-y-3">
+              {data.recentQuotes.map((q) => (
+                <div key={q.id} className="flex items-center justify-between bg-card rounded-xl p-3">
+                  <div>
+                    <p className="text-sm font-semibold text-text">{q.name}</p>
+                    <p className="text-xs text-text-muted">{q.service || "Sem servico"}</p>
+                  </div>
+                  <span className="text-xs text-text-muted">{new Date(q.created_at).toLocaleDateString("pt-BR")}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-text-muted text-sm py-4 text-center">Nenhum orcamento ainda</p>
           )}
         </div>
 
         {/* Recent Money */}
         <div className="bg-surface border border-border rounded-2xl p-6">
-          <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider mb-4">TRANSACOES RECENTES</h2>
-          {recentMoney && recentMoney.length > 0 ? (
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider">TRANSACOES RECENTES</h2>
+            <Link href="/admin/money" className="text-text-muted text-xs hover:text-secondary transition">Ver todos →</Link>
+          </div>
+          {data.recentMoney.length > 0 ? (
             <div className="space-y-3">
-              {recentMoney.map((entry) => (
+              {data.recentMoney.map((entry) => (
                 <div key={entry.id} className="flex items-center justify-between bg-card rounded-xl p-3">
                   <div>
-                    <p className="text-sm font-semibold">{entry.category || "Sem categoria"}</p>
+                    <p className="text-sm font-semibold text-text">{entry.category || "Sem categoria"}</p>
                     <span className="text-xs text-text-muted">{entry.date}</span>
                   </div>
                   <span className={`font-bold text-sm ${entry.kind === "income" ? "text-money-in" : "text-money-out"}`}>
@@ -126,10 +272,28 @@ export default async function AdminDashboard() {
               ))}
             </div>
           ) : (
-            <p className="text-text-muted text-sm">Nenhuma transacao ainda</p>
+            <p className="text-text-muted text-sm py-4 text-center">Nenhuma transacao ainda</p>
           )}
         </div>
       </div>
+
+      {/* Pinned Notes */}
+      {data.pinnedNotes.length > 0 && (
+        <div className="bg-surface border border-border rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider">NOTAS FIXADAS</h2>
+            <Link href="/admin/notes" className="text-text-muted text-xs hover:text-secondary transition">Ver todas →</Link>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-3">
+            {data.pinnedNotes.map((note) => (
+              <div key={note.id} className="bg-accent/5 border border-accent/20 rounded-xl p-4">
+                {note.title && <p className="text-sm font-bold text-accent mb-1">{note.title}</p>}
+                <p className="text-text-secondary text-xs line-clamp-3">{note.content}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
