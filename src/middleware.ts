@@ -29,16 +29,30 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect /admin routes
-  if (request.nextUrl.pathname.startsWith("/admin") && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("redirect", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+  const ALLOWED_EMAILS = [
+    "araujocompanyllc@gmail.com",
+    "gustavo@gtcapitalglobal.com",
+    "nathan@araujocompany.com",
+  ];
+
+  // Protect /admin routes - must be logged in AND have allowed email
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("redirect", request.nextUrl.pathname);
+      return NextResponse.redirect(url);
+    }
+    if (!ALLOWED_EMAILS.includes(user.email || "")) {
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
   }
 
-  // Redirect logged-in users away from /login
-  if (request.nextUrl.pathname === "/login" && user) {
+  // Redirect logged-in allowed users away from /login
+  if (request.nextUrl.pathname === "/login" && user && ALLOWED_EMAILS.includes(user.email || "")) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin";
     return NextResponse.redirect(url);
