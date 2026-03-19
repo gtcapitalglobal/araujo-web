@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   LayoutDashboard, Users, Briefcase, DollarSign, FolderOpen,
   Car, HardHat, BookOpen, Building2, Settings, CheckSquare, LogOut, Menu, X,
-  MessageSquare, Calendar, StickyNote, Bell, BarChart3, RefreshCw
+  MessageSquare, Calendar, StickyNote, Bell, BarChart3, RefreshCw, Receipt
 } from "lucide-react";
 import { useState } from "react";
 
@@ -26,6 +26,7 @@ const navItems = [
   { href: "/admin/reminders", icon: Bell, label: "Lembretes" },
   { href: "/admin/checklist", icon: CheckSquare, label: "Checklist" },
   { href: "/admin/reports", icon: BarChart3, label: "Relatorios" },
+  { href: "/admin/taxes", icon: Receipt, label: "Impostos" },
   { href: "/admin/knowledge", icon: BookOpen, label: "Conhecimento" },
   { href: "/admin/company", icon: Building2, label: "Empresa" },
   { href: "/admin/settings", icon: Settings, label: "Ajustes" },
