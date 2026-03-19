@@ -81,11 +81,13 @@ export default function CompanyPage() {
       notes: infoForm.notes || null,
     };
     if (info) {
-      await supabase.from("company_info").update(payload).eq("id", info.id);
+      const { error } = await supabase.from("company_info").update(payload).eq("id", info.id);
+      if (error) { alert("Erro ao atualizar: " + error.message); console.error(error); }
     } else {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      await supabase.from("company_info").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
+      if (!user) { alert("Voce precisa estar logado para salvar"); setSavingInfo(false); return; }
+      const { error } = await supabase.from("company_info").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
+      if (error) { alert("Erro ao salvar: " + error.message); console.error(error); }
     }
     setSavingInfo(false);
     fetchData();
