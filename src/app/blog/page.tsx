@@ -1,21 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { blogPosts, categories } from "@/lib/blog-data";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Flooring Tips & Guides | Araujo Flooring Blog",
-  description: "Expert flooring advice from Georgia's trusted professionals. Maintenance tips, cost guides, material comparisons, and more.",
-  openGraph: {
-    title: "Flooring Tips & Guides | Araujo Flooring Blog",
-    description: "Expert flooring advice from Georgia's trusted professionals.",
-    type: "website",
-  },
-};
+import { useState } from "react";
 
 export default function BlogPage() {
-  const featured = blogPosts[0];
-  const rest = blogPosts.slice(1);
+  const [activeCategory, setActiveCategory] = useState("All");
+
+  const filtered = activeCategory === "All"
+    ? blogPosts
+    : blogPosts.filter((p) => p.category === activeCategory);
+
+  const featured = filtered[0];
+  const rest = filtered.slice(1);
 
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
@@ -50,58 +48,75 @@ export default function BlogPage() {
       {/* Categories */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex flex-wrap gap-3 justify-center">
-          <span className="bg-[#2C3E50] text-white text-sm font-semibold px-5 py-2 rounded-full">All</span>
-          {categories.map((cat) => (
-            <span key={cat} className="bg-white text-[#2C3E50]/60 text-sm font-medium px-5 py-2 rounded-full border border-[#A0714F]/10 hover:border-[#A0714F]/30 transition cursor-pointer">
+          {["All", ...categories].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`text-sm font-semibold px-5 py-2 rounded-full transition ${
+                activeCategory === cat
+                  ? "bg-[#2C3E50] text-white"
+                  : "bg-white text-[#2C3E50]/60 border border-[#A0714F]/10 hover:border-[#A0714F]/30"
+              }`}
+            >
               {cat}
-            </span>
+            </button>
           ))}
         </div>
       </div>
 
-      {/* Featured Post */}
-      <div className="max-w-7xl mx-auto px-6 mb-12">
-        <Link href={`/blog/${featured.slug}`} className="group grid md:grid-cols-2 gap-8 bg-white rounded-3xl overflow-hidden border border-[#A0714F]/10 hover:shadow-xl hover:shadow-[#A0714F]/5 transition-all">
-          <div className="h-64 md:h-auto overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={featured.image} alt={featured.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          </div>
-          <div className="p-8 flex flex-col justify-center">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-[#A0714F]/10 text-[#A0714F] text-xs font-bold px-3 py-1 rounded-full">{featured.category}</span>
-              <span className="text-[#2C3E50]/30 text-xs">{featured.readTime}</span>
-            </div>
-            <h2 className="font-[family-name:var(--font-display)] text-2xl font-black text-[#2C3E50] mb-3 group-hover:text-[#A0714F] transition-colors">{featured.title}</h2>
-            <p className="text-[#2C3E50]/50 text-sm leading-relaxed mb-4">{featured.metaDescription}</p>
-            <span className="text-[#A0714F] font-semibold text-sm flex items-center gap-2">
-              Read Article
-              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-            </span>
-          </div>
-        </Link>
-      </div>
-
-      {/* Post Grid */}
-      <div className="max-w-7xl mx-auto px-6 pb-24">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {rest.map((post) => (
-            <Link key={post.slug} href={`/blog/${post.slug}`} className="group bg-white rounded-2xl overflow-hidden border border-[#A0714F]/10 hover:shadow-xl hover:shadow-[#A0714F]/5 hover:-translate-y-1 transition-all">
-              <div className="h-48 overflow-hidden">
+      {filtered.length === 0 ? (
+        <div className="max-w-7xl mx-auto px-6 pb-24 text-center py-20">
+          <p className="text-[#2C3E50]/40">No articles in this category yet.</p>
+        </div>
+      ) : (
+        <>
+          {/* Featured Post */}
+          <div className="max-w-7xl mx-auto px-6 mb-12">
+            <Link href={`/blog/${featured.slug}`} className="group grid md:grid-cols-2 gap-8 bg-white rounded-3xl overflow-hidden border border-[#A0714F]/10 hover:shadow-xl hover:shadow-[#A0714F]/5 transition-all">
+              <div className="h-64 md:h-auto overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <img src={featured.image} alt={featured.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="bg-[#A0714F]/10 text-[#A0714F] text-xs font-bold px-3 py-1 rounded-full">{post.category}</span>
-                  <span className="text-[#2C3E50]/30 text-xs">{post.readTime}</span>
+              <div className="p-8 flex flex-col justify-center">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="bg-[#A0714F]/10 text-[#A0714F] text-xs font-bold px-3 py-1 rounded-full">{featured.category}</span>
+                  <span className="text-[#2C3E50]/30 text-xs">{featured.readTime}</span>
                 </div>
-                <h3 className="font-bold text-[#2C3E50] text-lg mb-2 group-hover:text-[#A0714F] transition-colors leading-snug">{post.title}</h3>
-                <p className="text-[#2C3E50]/45 text-sm leading-relaxed line-clamp-2">{post.metaDescription}</p>
+                <h2 className="font-[family-name:var(--font-display)] text-2xl font-black text-[#2C3E50] mb-3 group-hover:text-[#A0714F] transition-colors">{featured.title}</h2>
+                <p className="text-[#2C3E50]/50 text-sm leading-relaxed mb-4">{featured.metaDescription}</p>
+                <span className="text-[#A0714F] font-semibold text-sm flex items-center gap-2">
+                  Read Article
+                  <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                </span>
               </div>
             </Link>
-          ))}
-        </div>
-      </div>
+          </div>
+
+          {/* Post Grid */}
+          {rest.length > 0 && (
+            <div className="max-w-7xl mx-auto px-6 pb-24">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {rest.map((post) => (
+                  <Link key={post.slug} href={`/blog/${post.slug}`} className="group bg-white rounded-2xl overflow-hidden border border-[#A0714F]/10 hover:shadow-xl hover:shadow-[#A0714F]/5 hover:-translate-y-1 transition-all">
+                    <div className="h-48 overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    <div className="p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="bg-[#A0714F]/10 text-[#A0714F] text-xs font-bold px-3 py-1 rounded-full">{post.category}</span>
+                        <span className="text-[#2C3E50]/30 text-xs">{post.readTime}</span>
+                      </div>
+                      <h3 className="font-bold text-[#2C3E50] text-lg mb-2 group-hover:text-[#A0714F] transition-colors leading-snug">{post.title}</h3>
+                      <p className="text-[#2C3E50]/45 text-sm leading-relaxed line-clamp-2">{post.metaDescription}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       {/* CTA */}
       <section className="py-16 bg-[#2C3E50]">
