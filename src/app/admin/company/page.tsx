@@ -80,12 +80,15 @@ export default function CompanyPage() {
       zip: infoForm.zip || null,
       notes: infoForm.notes || null,
     };
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { alert("Voce precisa estar logado para salvar"); setSavingInfo(false); return; }
+
     if (info) {
-      const { error } = await supabase.from("company_info").update(payload).eq("id", info.id);
+      // Delete old and insert new to avoid RLS issues
+      await supabase.from("company_info").delete().eq("id", info.id);
+      const { error } = await supabase.from("company_info").insert({ id: info.id, user_id: user.id, ...payload });
       if (error) { alert("Erro ao atualizar: " + error.message); console.error(error); }
     } else {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { alert("Voce precisa estar logado para salvar"); setSavingInfo(false); return; }
       const { error } = await supabase.from("company_info").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
       if (error) { alert("Erro ao salvar: " + error.message); console.error(error); }
     }
