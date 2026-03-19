@@ -100,6 +100,7 @@ export default async function HomePage() {
             <a href="#reviews" className="text-[#2C3E50]/70 hover:text-[#2C3E50] text-sm font-medium transition hidden md:block">Reviews</a>
             <a href="#about" className="text-[#2C3E50]/70 hover:text-[#2C3E50] text-sm font-medium transition hidden md:block">About</a>
             <a href="#contact" className="text-[#2C3E50]/70 hover:text-[#2C3E50] text-sm font-medium transition hidden md:block">Contact</a>
+            <Link href="/blog" className="text-[#2C3E50]/70 hover:text-[#2C3E50] text-sm font-medium transition hidden md:block">Blog</Link>
             <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className="bg-[#A0714F] hover:bg-[#8B6141] text-white text-sm font-bold py-2.5 px-5 rounded-lg transition flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
               <span className="hidden lg:inline">Call Now</span>
@@ -439,6 +440,9 @@ export default async function HomePage() {
               <div className="space-y-2">
                 {["Services", "Portfolio", "Reviews", "About", "Contact"].map((l) => (
                   <a key={l} href={`#${l.toLowerCase()}`} className="block text-white/40 hover:text-white/80 text-sm transition">{l}</a>
+                ))}
+                {["Blog"].map((l) => (
+                  <Link key={l} href="/blog" className="block text-white/40 hover:text-white/80 text-sm transition">{l}</Link>
                 ))}
               </div>
             </div>
