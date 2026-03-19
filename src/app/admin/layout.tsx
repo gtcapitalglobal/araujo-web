@@ -1,4 +1,19 @@
 import Sidebar from "@/components/admin/Sidebar";
+import type { Metadata, Viewport } from "next";
+
+export const metadata: Metadata = {
+  title: "Admin | Araujo Company",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Araujo Admin",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0D0D1A",
+};
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

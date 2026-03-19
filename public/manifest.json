@@ -1,0 +1,23 @@
+{
+  "name": "Araujo Admin",
+  "short_name": "Araujo",
+  "description": "Araujo Company LLC - Admin Panel",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "background_color": "#0D0D1A",
+  "theme_color": "#7B2FBE",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
