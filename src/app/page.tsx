@@ -27,7 +27,7 @@ const testimonials = [
 
 const portfolio = [
   { img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop", title: "Modern Living Room", type: "Hardwood" },
-  { img: "https://images.unsplash.com/photo-1600566753086-00f18f6b0f30?w=600&h=400&fit=crop", title: "Kitchen Renovation", type: "Tile" },
+  { img: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop", title: "Kitchen Renovation", type: "Tile" },
   { img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&h=400&fit=crop", title: "Master Bedroom", type: "LVP" },
   { img: "https://images.unsplash.com/photo-1600573472550-8090b5e0745e?w=600&h=400&fit=crop", title: "Open Floor Plan", type: "Hardwood" },
   { img: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600&h=400&fit=crop", title: "Bathroom Remodel", type: "Tile" },
