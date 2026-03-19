@@ -210,11 +210,8 @@ export default function CompanyPage() {
                 </div>
               </div>
             ) : (
-              <label className="mt-2 flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 hover:bg-card/30 transition">
-                <div className="text-center">
-                  <p className="text-text-muted text-sm mb-1">Clique para enviar QR Code</p>
-                  <p className="text-text-muted text-xs">PNG, JPG ou WEBP</p>
-                </div>
+              <label className="mt-2 inline-flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-2.5 cursor-pointer hover:border-primary/50 transition">
+                <span className="text-text-muted text-sm">📷 Enviar QR Code</span>
                 <input
                   type="file"
                   accept="image/*"
