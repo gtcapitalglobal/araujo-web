@@ -75,8 +75,11 @@ export default function NotesPage() {
         updated_at: now,
       }).eq("id", editing.id);
     } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
       await supabase.from("notes").insert({
         id: crypto.randomUUID(),
+        user_id: user.id,
         title: form.title || null,
         content: form.content || null,
         color: form.color,

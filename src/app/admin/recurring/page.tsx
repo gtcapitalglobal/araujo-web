@@ -97,8 +97,11 @@ export default function RecurringPage() {
     if (editing) {
       await supabase.from("recurring_expenses").update(payload).eq("id", editing.id);
     } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
       await supabase.from("recurring_expenses").insert({
         id: crypto.randomUUID(),
+        user_id: user.id,
         ...payload,
         is_active: true,
         created_at: new Date().toISOString(),

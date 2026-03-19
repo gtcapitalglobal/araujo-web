@@ -85,7 +85,9 @@ export default function DocsPage() {
     if (editing) {
       await supabase.from("doc_links").update(payload).eq("id", editing.id);
     } else {
-      await supabase.from("doc_links").insert({ id: crypto.randomUUID(), ...payload });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("doc_links").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
     }
     setSaving(false);
     setShowModal(false);

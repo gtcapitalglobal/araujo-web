@@ -77,8 +77,11 @@ export default function RemindersPage() {
 
   const handleSave = async () => {
     setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
     await supabase.from("reminders").insert({
       id: crypto.randomUUID(),
+      user_id: user.id,
       title: form.title,
       description: form.description || null,
       due_date: form.due_date,
