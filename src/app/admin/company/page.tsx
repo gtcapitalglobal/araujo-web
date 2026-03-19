@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { CompanyContact } from "@/lib/types";
-import { Plus, Pencil, Trash2, X, Phone, Mail, Save } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Phone, Mail, Save, Share2 } from "lucide-react";
 
 const contactTypeLabels: Record<string, string> = { accountant: "Contador", insurance: "Seguro", bank: "Banco", other: "Outro" };
 const contactTypeColors: Record<string, string> = { accountant: "bg-accent/20 text-accent", insurance: "bg-secondary/20 text-secondary", bank: "bg-success/20 text-success", other: "bg-text-muted/20 text-text-muted" };
@@ -147,13 +147,7 @@ export default function CompanyPage() {
             <div><label className={labelClass}>Email</label><input value={form.email} onChange={(e) => update("email", e.target.value)} className={inputClass} /></div>
             <div><label className={labelClass}>Horario de Funcionamento</label><input value={form.website} onChange={(e) => update("website", e.target.value)} placeholder="Mon - Sat: 7:00 AM - 6:00 PM" className={inputClass} /></div>
           </div>
-          <div><label className={labelClass}>Endereco Linha 1</label><input value={form.address_line1} onChange={(e) => update("address_line1", e.target.value)} className={inputClass} /></div>
-          <div><label className={labelClass}>Endereco Linha 2</label><input value={form.address_line2} onChange={(e) => update("address_line2", e.target.value)} className={inputClass} /></div>
-          <div className="grid grid-cols-3 gap-4">
-            <div><label className={labelClass}>Cidade</label><input value={form.city} onChange={(e) => update("city", e.target.value)} className={inputClass} /></div>
-            <div><label className={labelClass}>Estado</label><input value={form.state} onChange={(e) => update("state", e.target.value)} className={inputClass} /></div>
-            <div><label className={labelClass}>ZIP</label><input value={form.zip} onChange={(e) => update("zip", e.target.value)} className={inputClass} /></div>
-          </div>
+          <div><label className={labelClass}>Endereco Comercial</label><input value={form.address_line1} onChange={(e) => update("address_line1", e.target.value)} placeholder="8060 Adair Ln, Apt 4314, Sandy Springs, GA 30350" className={inputClass} /></div>
         </div>
       </div>
 
@@ -199,10 +193,30 @@ export default function CompanyPage() {
         <textarea value={form.notes} onChange={(e) => update("notes", e.target.value)} rows={3} className={`${inputClass} resize-none`} />
       </div>
 
-      {/* Save Button */}
-      <div className="flex items-center gap-4 mb-10">
+      {/* Save Button + WhatsApp Share */}
+      <div className="flex items-center gap-4 mb-10 flex-wrap">
         <button onClick={handleSaveInfo} disabled={savingInfo} className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white font-bold px-8 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50">
           <Save size={18} /> {savingInfo ? "Salvando..." : "Salvar Dados"}
+        </button>
+        <button
+          onClick={() => {
+            const lines = [
+              `*${form.legal_name || "Araujo Company LLC"}*`,
+              form.ein ? `EIN: ${form.ein}` : "",
+              form.phone ? `📱 ${form.phone}` : "",
+              form.email ? `📧 ${form.email}` : "",
+              form.address_line1 ? `📍 ${form.address_line1}` : "",
+              form.website ? `🕐 ${form.website}` : "",
+              form.bank_name ? `🏦 ${form.bank_name}` : "",
+              form.zelle ? `💰 Zelle: ${form.zelle}` : "",
+              "",
+              "araujocompany.com",
+            ].filter(Boolean).join("\n");
+            window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
+          }}
+          className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold px-6 py-3 rounded-xl transition"
+        >
+          <Share2 size={18} /> Enviar via WhatsApp
         </button>
         {saved && <span className="text-success text-sm font-semibold">Salvo com sucesso!</span>}
       </div>
