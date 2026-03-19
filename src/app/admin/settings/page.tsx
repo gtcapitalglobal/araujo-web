@@ -54,7 +54,9 @@ export default function SettingsPage() {
     if (settings) {
       await supabase.from("settings").update(payload).eq("id", settings.id);
     } else {
-      await supabase.from("settings").insert({ id: crypto.randomUUID(), ...payload });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("settings").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
     }
     setSaving(false);
     setSaved(true);

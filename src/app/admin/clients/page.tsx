@@ -75,8 +75,11 @@ export default function ClientsPage() {
         notes: form.notes || null,
       }).eq("id", editing.id);
     } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
       await supabase.from("clients").insert({
         id: crypto.randomUUID(),
+        user_id: user.id,
         name: form.name,
         phone: form.phone || null,
         email: form.email || null,

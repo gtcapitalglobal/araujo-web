@@ -49,8 +49,11 @@ export default function MoneyPage() {
 
   const handleSave = async () => {
     setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
     await supabase.from("money_entries").insert({
       id: crypto.randomUUID(),
+      user_id: user.id,
       kind: modalKind,
       category: form.category || null,
       subcategory: form.subcategory || null,

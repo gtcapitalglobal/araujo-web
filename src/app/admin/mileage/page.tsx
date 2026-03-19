@@ -35,8 +35,11 @@ export default function MileagePage() {
 
   const handleSave = async () => {
     setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
     await supabase.from("mileage_logs").insert({
       id: crypto.randomUUID(),
+      user_id: user.id,
       date: form.date,
       origin: form.origin || null,
       destination: form.destination || null,

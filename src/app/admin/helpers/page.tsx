@@ -63,7 +63,9 @@ export default function HelpersPage() {
     if (editing) {
       await supabase.from("helpers").update(payload).eq("id", editing.id);
     } else {
-      await supabase.from("helpers").insert({ id: crypto.randomUUID(), ...payload });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("helpers").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
     }
     setSaving(false);
     setShowHelperModal(false);
@@ -83,8 +85,11 @@ export default function HelpersPage() {
 
   const handleSavePayment = async () => {
     setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
     await supabase.from("helper_payments").insert({
       id: crypto.randomUUID(),
+      user_id: user.id,
       helper_id: paymentForm.helper_id,
       date: paymentForm.date,
       amount: parseFloat(paymentForm.amount),

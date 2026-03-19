@@ -83,7 +83,9 @@ export default function CompanyPage() {
     if (info) {
       await supabase.from("company_info").update(payload).eq("id", info.id);
     } else {
-      await supabase.from("company_info").insert({ id: crypto.randomUUID(), ...payload });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("company_info").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
     }
     setSavingInfo(false);
     fetchData();
@@ -109,7 +111,9 @@ export default function CompanyPage() {
     if (editingContact) {
       await supabase.from("company_contacts").update(payload).eq("id", editingContact.id);
     } else {
-      await supabase.from("company_contacts").insert({ id: crypto.randomUUID(), ...payload });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("company_contacts").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
     }
     setSavingContact(false);
     setShowContactModal(false);
