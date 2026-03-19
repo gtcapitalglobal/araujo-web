@@ -140,7 +140,7 @@ export default function AdminDashboard() {
       {/* WhatsApp Payment Button */}
       <button
         onClick={() => {
-          const msg = `*Araujo Company LLC*\nDados para pagamento:\n👉 https://www.araujocompany.com/pay`;
+          const msg = `*Araujo Company LLC*\nPayment info:\n👉 https://www.araujocompany.com/pay`;
           window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
         }}
         className="w-full flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-4 px-6 rounded-2xl transition mb-6 hover:scale-[1.01] active:scale-[0.99]"

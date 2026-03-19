@@ -265,7 +265,7 @@ export default function CompanyPage() {
           onClick={() => {
             const lines = [
               `*${form.legal_name || "Araujo Company LLC"}*`,
-              `Dados para pagamento:`,
+              `Payment info:`,
               `👉 https://www.araujocompany.com/pay`,
             ].join("\n");
             window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
