@@ -464,6 +464,61 @@ export default function TaxesPage() {
         ))}
       </div>
 
+      {/* Glossario */}
+      <div className="mt-10 bg-surface border border-border rounded-2xl p-6">
+        <h2 className="font-[family-name:var(--font-display)] text-lg font-black text-accent mb-2">GLOSSARIO</h2>
+        <p className="text-text-muted text-sm mb-6">Palavras em ingles que voce vai ouvir e precisa saber o que significam.</p>
+        <div className="space-y-2">
+          {[
+            { word: "LLC (Limited Liability Company)", meaning: "Empresa de responsabilidade limitada. Protege seus bens pessoais se a empresa tiver problemas." },
+            { word: "Single Member", meaning: "Dono unico. Significa que a empresa tem apenas um dono (voce)." },
+            { word: "EIN (Employer Identification Number)", meaning: "O CPF da empresa. Numero que o governo usa para identificar sua empresa." },
+            { word: "Schedule C", meaning: "Formulario onde voce declara quanto a empresa ganhou e gastou. Vai junto com sua declaracao pessoal." },
+            { word: "Tax Return", meaning: "Declaracao de imposto de renda. O papel que voce envia pro governo todo ano ate 15 de abril." },
+            { word: "Self-Employment Tax", meaning: "Imposto de autonomo. Os 15% que paga para aposentadoria e saude por ser dono do proprio negocio." },
+            { word: "Estimated Tax", meaning: "Imposto trimestral. Pagamento adiantado que voce faz a cada 3 meses." },
+            { word: "Deduction / Write-Off", meaning: "Abatimento. Gasto do negocio que reduz o valor do imposto que voce paga." },
+            { word: "Gross Income", meaning: "Receita bruta. Tudo que entrou de dinheiro antes de descontar os gastos." },
+            { word: "Net Income / Profit", meaning: "Lucro liquido. O que sobrou depois de pagar todas as despesas. E sobre isso que paga imposto." },
+            { word: "Expense", meaning: "Despesa/gasto. Qualquer dinheiro que saiu para manter o negocio funcionando." },
+            { word: "Revenue / Income", meaning: "Receita. Dinheiro que entrou na empresa (pagamentos dos clientes)." },
+            { word: "Invoice", meaning: "Fatura/nota. O papel que voce envia ao cliente cobrando pelo servico." },
+            { word: "Estimate / Quote", meaning: "Orcamento. O valor que voce passa pro cliente antes de fazer o trabalho." },
+            { word: "Contractor / Subcontractor", meaning: "Ajudante/subcontratado. Pessoa que voce contrata para ajudar num job mas nao e seu empregado." },
+            { word: "Employee", meaning: "Empregado. Pessoa que trabalha pra voce com horario fixo e voce controla como trabalha." },
+            { word: "W-9", meaning: "Formulario que voce pede ao ajudante ANTES de pagar. Tem o nome e numero de identificacao dele." },
+            { word: "1099-NEC", meaning: "Formulario que voce envia ao governo dizendo quanto pagou a cada ajudante no ano." },
+            { word: "W-2", meaning: "Formulario de empregado. Se voce tem empregados (nao ajudantes), envia isso em vez do 1099." },
+            { word: "IRS (Internal Revenue Service)", meaning: "Receita Federal americana. O orgao do governo que cuida dos impostos." },
+            { word: "Mileage", meaning: "Quilometragem. As milhas que voce roda a trabalho e pode abater no imposto." },
+            { word: "Standard Mileage Rate", meaning: "Valor por milha que o governo permite abater. Em 2026 e $0.725 por milha." },
+            { word: "Depreciation", meaning: "Depreciacao. Quando voce compra algo caro (van, equipamento), pode abater aos poucos ao longo dos anos." },
+            { word: "Section 179", meaning: "Regra que permite abater o valor total de um equipamento no ano que comprou, em vez de aos poucos." },
+            { word: "Audit", meaning: "Auditoria. Quando o governo pede para ver seus documentos e verificar se esta tudo certo." },
+            { word: "Fiscal Year / Tax Year", meaning: "Ano fiscal. O periodo de janeiro a dezembro que voce declara. Para a maioria e o ano normal." },
+            { word: "Quarterly", meaning: "Trimestral. A cada 3 meses. Os impostos sao pagos quarterly." },
+            { word: "Filing", meaning: "Declarar/enviar. Quando dizem file your taxes, significa enviar sua declaracao." },
+            { word: "Due Date / Deadline", meaning: "Prazo. A data limite para pagar ou enviar algo." },
+            { word: "Penalty", meaning: "Multa. O que voce paga se atrasar um prazo." },
+            { word: "Withholding", meaning: "Retencao. Quando alguem desconta o imposto antes de te pagar (nao se aplica a contractor, so a employee)." },
+            { word: "Business License", meaning: "Licenca comercial. Permissao da cidade ou condado para operar seu negocio." },
+            { word: "Liability Insurance", meaning: "Seguro de responsabilidade. Protege voce se algo der errado num job (estragar o piso do cliente, etc)." },
+            { word: "Workers Compensation", meaning: "Seguro de acidentes de trabalho. Obrigatorio se tiver empregados." },
+            { word: "Accounts Receivable", meaning: "Contas a receber. Dinheiro que clientes ainda te devem." },
+            { word: "Accounts Payable", meaning: "Contas a pagar. Dinheiro que voce deve a fornecedores ou ajudantes." },
+            { word: "Cash Flow", meaning: "Fluxo de caixa. O movimento de dinheiro entrando e saindo da empresa." },
+            { word: "Break Even", meaning: "Ponto de equilibrio. Quando a receita cobre exatamente os gastos, sem lucro nem prejuizo." },
+            { word: "Overhead", meaning: "Custos fixos. Gastos que voce tem todo mes mesmo sem trabalhar (seguro, telefone, van)." },
+            { word: "Markup", meaning: "Margem. Quanto voce adiciona ao custo do material para cobrar do cliente." },
+          ].map((item) => (
+            <div key={item.word} className="bg-card rounded-xl p-4 border border-border">
+              <p className="text-secondary font-bold text-sm">{item.word}</p>
+              <p className="text-text-secondary text-sm mt-1">{item.meaning}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Disclaimer */}
       <div className="mt-8 bg-card rounded-2xl p-6 border border-border text-center">
         <p className="text-text-muted text-xs">
