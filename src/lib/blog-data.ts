@@ -15,7 +15,7 @@ export const blogPosts: BlogPost[] = [
     title: "How to Protect Hardwood Floors from Georgia's Humidity",
     category: "Maintenance",
     metaDescription: "Learn how Georgia's humidity damages hardwood floors and the exact steps pros use to prevent cupping, buckling, and gapping year-round.",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=400&fit=crop",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=400&fit=crop",
     readTime: "6 min read",
     date: "2026-03-15",
     content: `Georgia homeowners love their hardwood floors, but our climate is one of the toughest environments in the country for natural wood. Summers push indoor humidity past 70%, and winter heating systems can drop it below 25%. That constant swing is what destroys floors — not any single weather event.
