@@ -152,8 +152,8 @@ export default function CompanyPage() {
               <input value={infoForm.email} onChange={(e) => setInfoForm({ ...infoForm, email: e.target.value })} className="w-full bg-card border border-border rounded-xl px-4 py-3 text-text focus:border-primary focus:outline-none" />
             </div>
             <div>
-              <label className="text-xs text-text-muted mb-1 block">Website</label>
-              <input value={infoForm.website} onChange={(e) => setInfoForm({ ...infoForm, website: e.target.value })} className="w-full bg-card border border-border rounded-xl px-4 py-3 text-text focus:border-primary focus:outline-none" />
+              <label className="text-xs text-text-muted mb-1 block">Horario (ex: Mon - Sat: 7AM - 6PM)</label>
+              <input value={infoForm.website} onChange={(e) => setInfoForm({ ...infoForm, website: e.target.value })} placeholder="Mon - Sat: 7:00 AM - 6:00 PM" className="w-full bg-card border border-border rounded-xl px-4 py-3 text-text focus:border-primary focus:outline-none" />
             </div>
           </div>
           <div>

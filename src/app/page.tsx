@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
 const services = [
   { icon: "🪵", title: "Hardwood Floors", desc: "Expert installation and refinishing of hardwood floors. Solid and engineered options available." },
@@ -10,7 +11,24 @@ const services = [
   { icon: "📐", title: "Custom Projects", desc: "Custom patterns, borders, inlays and specialty flooring designs." },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: companyInfo } = await supabase
+    .from("company_info")
+    .select("phone, email, address_line1, city, state, zip, website")
+    .limit(1)
+    .maybeSingle();
+
+  const location = companyInfo?.city && companyInfo?.state
+    ? `${companyInfo.city}, ${companyInfo.state}${companyInfo.zip ? ` ${companyInfo.zip}` : ""}`
+    : "Georgia, United States";
+  const fullAddress = companyInfo?.address_line1
+    ? `${companyInfo.address_line1}, ${location}`
+    : location;
+  const phone = companyInfo?.phone || "Call for a Free Quote";
+  const email = companyInfo?.email || "contact@araujocompany.com";
+  const hours = companyInfo?.website || "Mon - Sat: 7:00 AM - 6:00 PM";
+
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
 
@@ -194,10 +212,10 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12">
             <div className="space-y-5">
               {[
-                { icon: "📍", title: "Location", value: "Georgia, United States" },
-                { icon: "📧", title: "Email", value: "contact@araujocompany.com" },
-                { icon: "📱", title: "Phone", value: "Call for a Free Quote" },
-                { icon: "🕐", title: "Hours", value: "Mon - Sat: 7:00 AM - 6:00 PM" },
+                { icon: "📍", title: "Location", value: fullAddress },
+                { icon: "📧", title: "Email", value: email },
+                { icon: "📱", title: "Phone", value: phone },
+                { icon: "🕐", title: "Hours", value: hours },
               ].map((c) => (
                 <div key={c.title} className="flex items-center gap-5 bg-[#FAF7F2] rounded-xl p-5 border border-[#A0714F]/10">
                   <div className="w-12 h-12 bg-[#A0714F]/10 rounded-xl flex items-center justify-center text-2xl shrink-0">
