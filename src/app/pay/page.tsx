@@ -92,6 +92,17 @@ export default async function PayPage() {
               </div>
             )}
 
+            {/* QR Code */}
+            {qrCodeUrl && (
+              <div className="flex flex-col items-center">
+                <div className="bg-white rounded-2xl p-3 border border-[#A0714F]/10 shadow-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={qrCodeUrl} alt="QR Code Zelle" className="w-44 h-44 object-contain" />
+                </div>
+                <p className="text-[#A0714F] text-xs font-medium mt-3">Scan to pay via Zelle</p>
+              </div>
+            )}
+
             {/* Tag */}
             {tag && (
               <div className="bg-[#FAF7F2] rounded-xl p-4 border border-[#A0714F]/10">
@@ -99,17 +110,6 @@ export default async function PayPage() {
                   <span className="text-[#2C3E50]/50 text-xs">Tag</span>
                   <span className="text-[#2C3E50] font-bold text-sm">{tag}</span>
                 </div>
-              </div>
-            )}
-
-            {/* QR Code */}
-            {qrCodeUrl && (
-              <div className="flex flex-col items-center pt-2">
-                <div className="bg-white rounded-2xl p-3 border border-[#A0714F]/10 shadow-sm">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrCodeUrl} alt="QR Code Zelle" className="w-44 h-44 object-contain" />
-                </div>
-                <p className="text-[#A0714F] text-xs font-medium mt-3">Scan to pay via Zelle</p>
               </div>
             )}
 
