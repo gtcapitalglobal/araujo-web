@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 const services = [
-  { img: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=400&fit=crop", title: "Hardwood Floors", desc: "Expert installation and refinishing of solid and engineered hardwood floors with premium finishes." },
+  { img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&h=400&fit=crop", title: "Hardwood Floors", desc: "Expert installation and refinishing of solid and engineered hardwood floors with premium finishes." },
   { img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&h=400&fit=crop", title: "Tile & Stone", desc: "Ceramic, porcelain, marble and natural stone for floors, walls, backsplashes and showers." },
   { img: "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=600&h=400&fit=crop", title: "Laminate & Vinyl", desc: "Affordable, durable and waterproof laminate and luxury vinyl plank (LVP) installation." },
   { img: "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=600&h=400&fit=crop", title: "Floor Refinishing", desc: "Sand, stain and refinish existing hardwood floors to restore their original beauty." },
