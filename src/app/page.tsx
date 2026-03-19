@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import WhatsAppButton from "@/components/public/WhatsAppButton";
+import ContactForm from "@/components/public/ContactForm";
 
 const services = [
   { img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&h=400&fit=crop", title: "Hardwood Floors", desc: "Expert installation and refinishing of solid and engineered hardwood floors with premium finishes." },
@@ -394,26 +396,7 @@ export default async function HomePage() {
                 ))}
               </div>
             </div>
-            <form className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <input type="text" placeholder="Your Name" className="w-full bg-[#FAF7F2] border border-[#A0714F]/15 rounded-xl px-5 py-3.5 text-[#2C3E50] placeholder:text-[#2C3E50]/30 focus:border-[#A0714F] focus:outline-none focus:ring-2 focus:ring-[#A0714F]/10 transition" />
-                <input type="tel" placeholder="Your Phone" className="w-full bg-[#FAF7F2] border border-[#A0714F]/15 rounded-xl px-5 py-3.5 text-[#2C3E50] placeholder:text-[#2C3E50]/30 focus:border-[#A0714F] focus:outline-none focus:ring-2 focus:ring-[#A0714F]/10 transition" />
-              </div>
-              <input type="email" placeholder="Your Email" className="w-full bg-[#FAF7F2] border border-[#A0714F]/15 rounded-xl px-5 py-3.5 text-[#2C3E50] placeholder:text-[#2C3E50]/30 focus:border-[#A0714F] focus:outline-none focus:ring-2 focus:ring-[#A0714F]/10 transition" />
-              <select className="w-full bg-[#FAF7F2] border border-[#A0714F]/15 rounded-xl px-5 py-3.5 text-[#2C3E50]/50 focus:border-[#A0714F] focus:outline-none focus:ring-2 focus:ring-[#A0714F]/10 transition">
-                <option value="">Select a Service</option>
-                <option>Hardwood Floors</option>
-                <option>Tile & Stone</option>
-                <option>Laminate & Vinyl</option>
-                <option>Floor Refinishing</option>
-                <option>Repairs</option>
-                <option>Custom Projects</option>
-              </select>
-              <textarea placeholder="Tell us about your project..." rows={4} className="w-full bg-[#FAF7F2] border border-[#A0714F]/15 rounded-xl px-5 py-3.5 text-[#2C3E50] placeholder:text-[#2C3E50]/30 focus:border-[#A0714F] focus:outline-none focus:ring-2 focus:ring-[#A0714F]/10 transition resize-y" />
-              <button type="submit" className="w-full bg-[#2C3E50] hover:bg-[#1a2a38] text-white font-bold py-4 rounded-xl transition-all hover:shadow-lg hover:shadow-[#2C3E50]/20">
-                Send Message
-              </button>
-            </form>
+            <ContactForm />
           </div>
         </div>
       </section>
@@ -463,6 +446,8 @@ export default async function HomePage() {
           </div>
         </div>
       </footer>
+
+      <WhatsAppButton />
     </div>
   );
 }

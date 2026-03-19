@@ -6,12 +6,13 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
   LayoutDashboard, Users, Briefcase, DollarSign, FolderOpen,
-  Car, HardHat, BookOpen, Building2, Settings, CheckSquare, LogOut, Menu, X
+  Car, HardHat, BookOpen, Building2, Settings, CheckSquare, LogOut, Menu, X, MessageSquare
 } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/admin/quotes", icon: MessageSquare, label: "Orcamentos" },
   { href: "/admin/clients", icon: Users, label: "Clientes" },
   { href: "/admin/jobs", icon: Briefcase, label: "Jobs" },
   { href: "/admin/money", icon: DollarSign, label: "Dinheiro" },
