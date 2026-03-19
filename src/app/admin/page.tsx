@@ -23,7 +23,7 @@ interface DashboardData {
   upcomingReminders: { id: string; title: string; due_date: string; is_done: boolean }[];
   recentMoney: { id: string; kind: string; category: string | null; amount: number; date: string }[];
   pinnedNotes: { id: string; title: string | null; content: string | null }[];
-  upcomingExpenses: { id: string; category: string; description: string | null; amount: number; next_due: string; frequency: string }[];
+  upcomingExpenses: { id: string; category: string; description: string | null; amount: number; next_due: string; frequency: string; source: "recurring" | "money" }[];
 }
 
 export default function AdminDashboard() {
@@ -34,20 +34,23 @@ export default function AdminDashboard() {
   const [paidId, setPaidId] = useState<string | null>(null);
 
   const handlePayExpense = async (exp: DashboardData["upcomingExpenses"][0]) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from("money_entries").insert({
-      id: crypto.randomUUID(),
-      user_id: user.id,
-      kind: "expense",
-      category: exp.category,
-      subcategory: exp.description,
-      amount: exp.amount,
-      date: new Date().toISOString().split("T")[0],
-      notes: `Despesa recorrente: ${exp.category}${exp.description ? " - " + exp.description : ""}`,
-    });
-    const nextDue = getNextDueDate(exp.next_due, exp.frequency);
-    await supabase.from("recurring_expenses").update({ next_due: nextDue }).eq("id", exp.id);
+    if (exp.source === "recurring") {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("money_entries").insert({
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        kind: "expense",
+        category: exp.category,
+        subcategory: exp.description,
+        amount: exp.amount,
+        date: new Date().toISOString().split("T")[0],
+        notes: `Despesa recorrente: ${exp.category}${exp.description ? " - " + exp.description : ""}`,
+      });
+      const nextDue = getNextDueDate(exp.next_due, exp.frequency);
+      await supabase.from("recurring_expenses").update({ next_due: nextDue }).eq("id", exp.id);
+    }
+    // For money entries, just mark as paid visually
     setPaidId(exp.id);
     setTimeout(() => setPaidId(null), 2000);
     fetchData();
@@ -71,7 +74,7 @@ export default function AdminDashboard() {
     const [
       clientsRes, jobsRes, incomeRes, expensesRes, mileageRes,
       quotesCountRes, remindersCountRes, todayJobsRes, recentQuotesRes,
-      upcomingRemindersRes, recentMoneyRes, pinnedNotesRes, upcomingExpensesRes
+      upcomingRemindersRes, recentMoneyRes, pinnedNotesRes, upcomingExpensesRes, upcomingMoneyRes
     ] = await Promise.all([
       supabase.from("clients").select("id", { count: "exact", head: true }),
       supabase.from("jobs").select("id", { count: "exact", head: true }).neq("status", "cancelled"),
@@ -86,6 +89,7 @@ export default function AdminDashboard() {
       supabase.from("money_entries").select("id, kind, category, amount, date").order("date", { ascending: false }).limit(5),
       supabase.from("notes").select("id, title, content").eq("pinned", true).limit(3),
       supabase.from("recurring_expenses").select("id, category, description, amount, next_due, frequency").eq("is_active", true).not("next_due", "is", null).lte("next_due", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]).order("next_due"),
+      supabase.from("money_entries").select("id, category, notes, amount, date").eq("kind", "expense").gte("date", today).lte("date", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]).order("date"),
     ]);
 
     const totalIncome = incomeRes.data?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
@@ -106,7 +110,12 @@ export default function AdminDashboard() {
       upcomingReminders: upcomingRemindersRes.data || [],
       recentMoney: recentMoneyRes.data || [],
       pinnedNotes: pinnedNotesRes.data || [],
-      upcomingExpenses: upcomingExpensesRes.data || [],
+      upcomingExpenses: [
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(upcomingExpensesRes.data || []).map((e: any) => ({ id: e.id, category: e.category, description: e.description, amount: e.amount, next_due: e.next_due, frequency: e.frequency, source: "recurring" as const })),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(upcomingMoneyRes.data || []).map((e: any) => ({ id: e.id, category: e.category || "Outro", description: e.notes || null, amount: e.amount, next_due: e.date, frequency: "unica", source: "money" as const })),
+      ].sort((a, b) => a.next_due.localeCompare(b.next_due)),
     });
     setLoading(false);
   }, [supabase]);
