@@ -188,7 +188,7 @@ export default function MoneyPage() {
                 <input type="number" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className="w-full bg-card border border-border rounded-xl px-4 py-3 text-text focus:border-primary focus:outline-none" />
               </div>
               <div>
-                <label className="text-xs text-text-muted mb-1 block">Data</label>
+                <label className="text-xs text-text-muted mb-1 block">Data de Vencimento</label>
                 <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="w-full bg-card border border-border rounded-xl px-4 py-3 text-text focus:border-primary focus:outline-none" />
               </div>
               <div>
