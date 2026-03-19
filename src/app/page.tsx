@@ -54,7 +54,7 @@ export default async function HomePage() {
   const fullAddress = companyInfo?.address_line1
     ? `${companyInfo.address_line1}, ${location}`
     : location;
-  const phone = companyInfo?.phone || "(555) 123-4567";
+  const phone = companyInfo?.phone || "(404) 566-0988";
   const email = companyInfo?.email || "contact@araujocompany.com";
   const hours = companyInfo?.website || "Mon - Sat: 7:00 AM - 6:00 PM";
 
@@ -384,10 +384,10 @@ export default async function HomePage() {
               <div className="flex items-center gap-4 pt-4">
                 <span className="text-[#2C3E50]/40 text-sm font-medium">Follow us:</span>
                 {[
-                  { name: "Facebook", svg: "M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" },
-                  { name: "Instagram", svg: "M16 4H8a4 4 0 00-4 4v8a4 4 0 004 4h8a4 4 0 004-4V8a4 4 0 00-4-4zm-4 11a3 3 0 110-6 3 3 0 010 6zm3.5-6.5a1 1 0 110-2 1 1 0 010 2z" },
+                  { name: "Facebook", href: "#", svg: "M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" },
+                  { name: "Instagram", href: "https://www.instagram.com/araujoflooringllc", svg: "M16 4H8a4 4 0 00-4 4v8a4 4 0 004 4h8a4 4 0 004-4V8a4 4 0 00-4-4zm-4 11a3 3 0 110-6 3 3 0 010 6zm3.5-6.5a1 1 0 110-2 1 1 0 010 2z" },
                 ].map((s) => (
-                  <a key={s.name} href="#" className="w-10 h-10 bg-[#2C3E50]/5 hover:bg-[#A0714F]/10 border border-[#2C3E50]/10 rounded-xl flex items-center justify-center transition" aria-label={s.name}>
+                  <a key={s.name} href={s.href} target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-[#2C3E50]/5 hover:bg-[#A0714F]/10 border border-[#2C3E50]/10 rounded-xl flex items-center justify-center transition" aria-label={s.name}>
                     <svg className="w-5 h-5 text-[#2C3E50]/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={s.svg} /></svg>
                   </a>
                 ))}
