@@ -168,30 +168,69 @@ export default function CompanyPage() {
             <div><label className={labelClass}>Zelle</label><input value={form.zelle} onChange={(e) => update("zelle", e.target.value)} className={inputClass} /></div>
             <div><label className={labelClass}>Tag (CashApp, Venmo, etc.)</label><input value={form.tag} onChange={(e) => update("tag", e.target.value)} placeholder="$araujocompany" className={inputClass} /></div>
           </div>
-          {/* QR Code */}
+          {/* QR Code Upload */}
           <div>
-            <label className={labelClass}>QR Code (URL da imagem)</label>
-            <input value={form.qr_code_url} onChange={(e) => update("qr_code_url", e.target.value)} placeholder="Cole a URL da imagem do QR Code" className={inputClass} />
-            {form.qr_code_url && (
-              <div className="mt-3 flex items-start gap-4">
+            <label className={labelClass}>QR Code para Pagamento</label>
+            {form.qr_code_url ? (
+              <div className="mt-2 flex items-start gap-4">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={form.qr_code_url} alt="QR Code" className="w-32 h-32 rounded-xl border border-border bg-white p-1 object-contain" />
+                <img src={form.qr_code_url} alt="QR Code" className="w-36 h-36 rounded-xl border border-border bg-white p-2 object-contain" />
                 <div className="flex flex-col gap-2">
-                  <button
-                    onClick={() => window.open(form.qr_code_url, "_blank")}
-                    className="text-xs text-secondary hover:underline"
-                  >Ver imagem completa</button>
                   <button
                     onClick={() => {
                       const msg = `*${form.legal_name || "Araujo Company LLC"}*\n💰 Zelle: ${form.zelle || ""}\n🏷️ Tag: ${form.tag || ""}\n\nQR Code: ${form.qr_code_url}`;
                       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
                     }}
-                    className="flex items-center gap-1 text-xs bg-[#25D366] text-white px-3 py-1.5 rounded-lg hover:bg-[#1da851] transition"
+                    className="flex items-center gap-1 text-xs bg-[#25D366] text-white px-3 py-2 rounded-lg hover:bg-[#1da851] transition"
                   >
                     <Share2 size={12} /> Enviar QR via WhatsApp
                   </button>
+                  <button
+                    onClick={() => window.open(form.qr_code_url, "_blank")}
+                    className="text-xs text-secondary hover:underline text-left"
+                  >Ver imagem completa</button>
+                  <label className="text-xs text-text-muted hover:text-error cursor-pointer">
+                    Trocar imagem
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const ext = file.name.split(".").pop() || "png";
+                        const path = `company/qr-code-${Date.now()}.${ext}`;
+                        const { error } = await supabase.storage.from("documents").upload(path, file, { contentType: file.type, upsert: true });
+                        if (error) { alert("Erro no upload: " + error.message); return; }
+                        const { data: urlData } = supabase.storage.from("documents").getPublicUrl(path);
+                        update("qr_code_url", urlData.publicUrl);
+                      }}
+                    />
+                  </label>
                 </div>
               </div>
+            ) : (
+              <label className="mt-2 flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 hover:bg-card/30 transition">
+                <div className="text-center">
+                  <p className="text-text-muted text-sm mb-1">Clique para enviar QR Code</p>
+                  <p className="text-text-muted text-xs">PNG, JPG ou WEBP</p>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const ext = file.name.split(".").pop() || "png";
+                    const path = `company/qr-code-${Date.now()}.${ext}`;
+                    const { error } = await supabase.storage.from("documents").upload(path, file, { contentType: file.type, upsert: true });
+                    if (error) { alert("Erro no upload: " + error.message); return; }
+                    const { data: urlData } = supabase.storage.from("documents").getPublicUrl(path);
+                    update("qr_code_url", urlData.publicUrl);
+                  }}
+                />
+              </label>
             )}
           </div>
         </div>
