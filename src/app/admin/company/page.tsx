@@ -16,7 +16,7 @@ interface InfoForm {
   legal_name: string; ein: string; duns_number: string;
   phone: string; email: string; website: string;
   address_line1: string; address_line2: string; city: string; state: string; zip: string;
-  bank_name: string; account_number: string; routing_ach: string; routing_wire: string; bank_branch: string; zelle: string; tag: string; qr_code_url: string;
+  bank_name: string; account_number: string; routing_ach: string; routing_wire: string; bank_branch: string; zelle: string; qr_code_url: string;
   member_name: string; member_role: string; member_percent: string; member_email: string; member_phone: string; member_address: string;
   notes: string;
 }
@@ -25,7 +25,7 @@ const emptyForm: InfoForm = {
   legal_name: "", ein: "", duns_number: "",
   phone: "", email: "", website: "",
   address_line1: "", address_line2: "", city: "", state: "", zip: "",
-  bank_name: "", account_number: "", routing_ach: "", routing_wire: "", bank_branch: "", zelle: "", tag: "", qr_code_url: "",
+  bank_name: "", account_number: "", routing_ach: "", routing_wire: "", bank_branch: "", zelle: "", qr_code_url: "",
   member_name: "", member_role: "", member_percent: "", member_email: "", member_phone: "", member_address: "",
   notes: "",
 };
@@ -58,7 +58,7 @@ export default function CompanyPage() {
         legal_name: d.legal_name || "", ein: d.ein || "", duns_number: d.duns_number || "",
         phone: d.phone || "", email: d.email || "", website: d.website || "",
         address_line1: d.address_line1 || "", address_line2: d.address_line2 || "", city: d.city || "", state: d.state || "", zip: d.zip || "",
-        bank_name: d.bank_name || "", account_number: d.account_number || "", routing_ach: d.routing_ach || "", routing_wire: d.routing_wire || "", bank_branch: d.bank_branch || "", zelle: d.zelle || "", tag: d.tag || "", qr_code_url: d.qr_code_url || "",
+        bank_name: d.bank_name || "", account_number: d.account_number || "", routing_ach: d.routing_ach || "", routing_wire: d.routing_wire || "", bank_branch: d.bank_branch || "", zelle: d.zelle || "", qr_code_url: d.qr_code_url || "",
         member_name: d.member_name || "", member_role: d.member_role || "", member_percent: d.member_percent || "", member_email: d.member_email || "", member_phone: d.member_phone || "", member_address: d.member_address || "",
         notes: d.notes || "",
       });
@@ -163,10 +163,9 @@ export default function CompanyPage() {
             <div><label className={labelClass}>Routing ACH</label><input value={form.routing_ach} onChange={(e) => update("routing_ach", e.target.value)} className={inputClass} /></div>
             <div><label className={labelClass}>Routing Wire</label><input value={form.routing_wire} onChange={(e) => update("routing_wire", e.target.value)} className={inputClass} /></div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className={labelClass}>Branch</label><input value={form.bank_branch} onChange={(e) => update("bank_branch", e.target.value)} className={inputClass} /></div>
             <div><label className={labelClass}>Zelle</label><input value={form.zelle} onChange={(e) => update("zelle", e.target.value)} className={inputClass} /></div>
-            <div><label className={labelClass}>Tag (CashApp, Venmo, etc.)</label><input value={form.tag} onChange={(e) => update("tag", e.target.value)} placeholder="$araujocompany" className={inputClass} /></div>
           </div>
           {/* QR Code Upload */}
           <div>
@@ -178,7 +177,7 @@ export default function CompanyPage() {
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={() => {
-                      const msg = `*${form.legal_name || "Araujo Company LLC"}*\n💰 Zelle: ${form.zelle || ""}\n🏷️ Tag: ${form.tag || ""}\n\nQR Code: ${form.qr_code_url}`;
+                      const msg = `*${form.legal_name || "Araujo Company LLC"}*\nPayment info:\n👉 https://www.araujocompany.com/pay`;
                       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
                     }}
                     className="flex items-center gap-1 text-xs bg-[#25D366] text-white px-3 py-2 rounded-lg hover:bg-[#1da851] transition"

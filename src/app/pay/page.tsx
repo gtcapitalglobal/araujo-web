@@ -22,7 +22,6 @@ export default async function PayPage() {
   const routingWire = company?.routing_wire || "";
   const bankBranch = company?.bank_branch || "";
   const zelle = company?.zelle || company?.email || "";
-  const tag = company?.tag || "";
   const qrCodeUrl = company?.qr_code_url || "";
   const phone = company?.phone || "(404) 566-0988";
 
@@ -100,16 +99,6 @@ export default async function PayPage() {
                   <img src={qrCodeUrl} alt="QR Code Zelle" className="w-44 h-44 object-contain" />
                 </div>
                 <p className="text-[#A0714F] text-xs font-medium mt-3">Scan to pay via Zelle</p>
-              </div>
-            )}
-
-            {/* Tag */}
-            {tag && (
-              <div className="bg-[#FAF7F2] rounded-xl p-4 border border-[#A0714F]/10">
-                <div className="flex justify-between items-center">
-                  <span className="text-[#2C3E50]/50 text-xs">Tag</span>
-                  <span className="text-[#2C3E50] font-bold text-sm">{tag}</span>
-                </div>
               </div>
             )}
 
