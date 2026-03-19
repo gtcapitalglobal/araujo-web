@@ -22,6 +22,7 @@ interface DashboardData {
   upcomingReminders: { id: string; title: string; due_date: string; is_done: boolean }[];
   recentMoney: { id: string; kind: string; category: string | null; amount: number; date: string }[];
   pinnedNotes: { id: string; title: string | null; content: string | null }[];
+  upcomingExpenses: { id: string; category: string; description: string | null; amount: number; next_due: string; frequency: string }[];
 }
 
 export default function AdminDashboard() {
@@ -48,7 +49,7 @@ export default function AdminDashboard() {
     const [
       clientsRes, jobsRes, incomeRes, expensesRes, mileageRes,
       quotesCountRes, remindersCountRes, todayJobsRes, recentQuotesRes,
-      upcomingRemindersRes, recentMoneyRes, pinnedNotesRes
+      upcomingRemindersRes, recentMoneyRes, pinnedNotesRes, upcomingExpensesRes
     ] = await Promise.all([
       supabase.from("clients").select("id", { count: "exact", head: true }),
       supabase.from("jobs").select("id", { count: "exact", head: true }).neq("status", "cancelled"),
@@ -62,6 +63,7 @@ export default function AdminDashboard() {
       supabase.from("reminders").select("id, title, due_date, is_done").eq("is_done", false).order("due_date").limit(5),
       supabase.from("money_entries").select("id, kind, category, amount, date").order("date", { ascending: false }).limit(5),
       supabase.from("notes").select("id, title, content").eq("pinned", true).limit(3),
+      supabase.from("recurring_expenses").select("id, category, description, amount, next_due, frequency").eq("is_active", true).not("next_due", "is", null).lte("next_due", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]).order("next_due"),
     ]);
 
     const totalIncome = incomeRes.data?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
@@ -82,6 +84,7 @@ export default function AdminDashboard() {
       upcomingReminders: upcomingRemindersRes.data || [],
       recentMoney: recentMoneyRes.data || [],
       pinnedNotes: pinnedNotesRes.data || [],
+      upcomingExpenses: upcomingExpensesRes.data || [],
     });
     setLoading(false);
   }, [supabase]);
@@ -270,6 +273,46 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+
+      {/* Upcoming Expenses */}
+      {data.upcomingExpenses.length > 0 && (
+        <div className="bg-error/5 border border-error/20 rounded-2xl p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-error tracking-wider flex items-center gap-2">
+              <AlertTriangle size={16} />
+              DESPESAS PROXIMAS (7 DIAS)
+            </h2>
+            <Link href="/admin/recurring" className="text-text-muted text-xs hover:text-error transition">Ver todas →</Link>
+          </div>
+          <div className="space-y-3">
+            {data.upcomingExpenses.map((exp) => {
+              const dueDate = new Date(exp.next_due);
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              const isOverdue = diffDays < 0;
+              const isToday = diffDays === 0;
+              return (
+                <div key={exp.id} className={`flex items-center justify-between bg-card rounded-xl p-3 ${isOverdue ? "border border-error/40" : isToday ? "border border-warning/40" : ""}`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${isOverdue ? "bg-error/20 text-error" : isToday ? "bg-warning/20 text-warning" : "bg-accent/20 text-accent"}`}>
+                      {isOverdue ? "!" : isToday ? "⚡" : `${diffDays}d`}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-text">{exp.category}{exp.description ? ` - ${exp.description}` : ""}</p>
+                      <p className={`text-xs ${isOverdue ? "text-error" : "text-text-muted"}`}>
+                        {isOverdue ? `Atrasada ${Math.abs(diffDays)} dia${Math.abs(diffDays) > 1 ? "s" : ""}` : isToday ? "Vence hoje!" : `Vence em ${diffDays} dia${diffDays > 1 ? "s" : ""}`}
+                        {" · "}{exp.frequency}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-error font-bold text-sm">${exp.amount.toFixed(2)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         {/* Recent Quotes */}
