@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { MoneyEntry } from "@/lib/types";
-import { DollarSign, TrendingUp, TrendingDown, Plus, Trash2, X } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Plus, Trash2, X, RefreshCw } from "lucide-react";
+import { frequencyOptions, getNextDueDate } from "@/lib/recurring";
 
 const incomeCategories = ["Service", "Material Reimbursement", "Referral", "Other Income"];
 const expenseCategories = ["Materials", "Equipment", "Gas", "Insurance", "Tools", "Supplies", "Marketing", "Software", "Helper Payment", "Other Expense"];
@@ -14,7 +15,7 @@ export default function MoneyPage() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [modalKind, setModalKind] = useState<"income" | "expense">("income");
-  const [form, setForm] = useState({ category: "", subcategory: "", amount: "", date: new Date().toISOString().slice(0, 10), notes: "" });
+  const [form, setForm] = useState({ category: "", subcategory: "", amount: "", date: new Date().toISOString().slice(0, 10), notes: "", isRecurring: false, frequency: "mensal" });
   const [saving, setSaving] = useState(false);
 
   const now = new Date();
@@ -43,7 +44,7 @@ export default function MoneyPage() {
 
   const openModal = (kind: "income" | "expense") => {
     setModalKind(kind);
-    setForm({ category: "", subcategory: "", amount: "", date: new Date().toISOString().slice(0, 10), notes: "" });
+    setForm({ category: "", subcategory: "", amount: "", date: new Date().toISOString().slice(0, 10), notes: "", isRecurring: false, frequency: "mensal" });
     setShowModal(true);
   };
 
@@ -61,6 +62,21 @@ export default function MoneyPage() {
       date: form.date,
       notes: form.notes || null,
     });
+    // Create recurring expense if checked
+    if (form.isRecurring && modalKind === "expense") {
+      const nextDue = getNextDueDate(form.date, form.frequency);
+      await supabase.from("recurring_expenses").insert({
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        category: form.category || "Outro",
+        description: form.subcategory || form.notes || null,
+        amount: parseFloat(form.amount),
+        frequency: form.frequency,
+        next_due: nextDue,
+        is_active: true,
+        created_at: new Date().toISOString(),
+      });
+    }
     setSaving(false);
     setShowModal(false);
     fetchEntries();
@@ -179,6 +195,33 @@ export default function MoneyPage() {
                 <label className="text-xs text-text-muted mb-1 block">Notas</label>
                 <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full bg-card border border-border rounded-xl px-4 py-3 text-text focus:border-primary focus:outline-none resize-none" />
               </div>
+              {modalKind === "expense" && (
+                <div className="bg-card/50 border border-border rounded-xl p-4 space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.isRecurring}
+                      onChange={(e) => setForm({ ...form, isRecurring: e.target.checked })}
+                      className="w-5 h-5 rounded accent-primary"
+                    />
+                    <span className="text-sm font-medium text-text flex items-center gap-2">
+                      <RefreshCw size={14} className="text-secondary" />
+                      Despesa Recorrente?
+                    </span>
+                  </label>
+                  {form.isRecurring && (
+                    <select
+                      value={form.frequency}
+                      onChange={(e) => setForm({ ...form, frequency: e.target.value })}
+                      className="w-full bg-card border border-border rounded-xl px-4 py-3 text-text focus:border-primary focus:outline-none"
+                    >
+                      {frequencyOptions.map((f) => (
+                        <option key={f.key} value={f.key}>{f.label}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowModal(false)} className="flex-1 border border-border rounded-xl py-3 text-text-secondary hover:bg-card transition-colors">Cancelar</button>

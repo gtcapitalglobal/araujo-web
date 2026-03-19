@@ -7,6 +7,7 @@ import {
   DollarSign, Briefcase, Users, Car, MessageSquare, Bell,
   Plus, ArrowRight, Clock, CheckCircle, AlertTriangle, StickyNote
 } from "lucide-react";
+import { getNextDueDate } from "@/lib/recurring";
 
 interface DashboardData {
   monthIncome: number;
@@ -30,6 +31,27 @@ export default function AdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState("");
+  const [paidId, setPaidId] = useState<string | null>(null);
+
+  const handlePayExpense = async (exp: DashboardData["upcomingExpenses"][0]) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("money_entries").insert({
+      id: crypto.randomUUID(),
+      user_id: user.id,
+      kind: "expense",
+      category: exp.category,
+      subcategory: exp.description,
+      amount: exp.amount,
+      date: new Date().toISOString().split("T")[0],
+      notes: `Despesa recorrente: ${exp.category}${exp.description ? " - " + exp.description : ""}`,
+    });
+    const nextDue = getNextDueDate(exp.next_due, exp.frequency);
+    await supabase.from("recurring_expenses").update({ next_due: nextDue }).eq("id", exp.id);
+    setPaidId(exp.id);
+    setTimeout(() => setPaidId(null), 2000);
+    fetchData();
+  };
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -306,7 +328,15 @@ export default function AdminDashboard() {
                       </p>
                     </div>
                   </div>
-                  <span className="text-error font-bold text-sm">${exp.amount.toFixed(2)}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-error font-bold text-sm">${exp.amount.toFixed(2)}</span>
+                    <button
+                      onClick={() => handlePayExpense(exp)}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${paidId === exp.id ? "bg-success/20 text-success" : "bg-accent/20 text-accent hover:bg-accent/30"}`}
+                    >
+                      {paidId === exp.id ? "✓" : "Pagar"}
+                    </button>
+                  </div>
                 </div>
               );
             })}

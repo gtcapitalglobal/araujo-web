@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { RefreshCw, Plus, Pencil, Trash2, X, DollarSign, ToggleLeft, ToggleRight } from "lucide-react";
+import { RefreshCw, Plus, Pencil, Trash2, X, DollarSign, ToggleLeft, ToggleRight, CheckCircle } from "lucide-react";
+import { frequencyOptions, getNextDueDate } from "@/lib/recurring";
 
 interface RecurringExpense {
   id: string;
@@ -15,13 +16,6 @@ interface RecurringExpense {
   is_active: boolean;
   created_at: string;
 }
-
-const frequencyOptions = [
-  { key: "semanal", label: "Semanal", monthlyFactor: 4.33 },
-  { key: "mensal", label: "Mensal", monthlyFactor: 1 },
-  { key: "trimestral", label: "Trimestral", monthlyFactor: 1 / 3 },
-  { key: "anual", label: "Anual", monthlyFactor: 1 / 12 },
-];
 
 const categoryOptions = [
   "Seguro", "Aluguel", "Software", "Telefone", "Internet",
@@ -44,6 +38,29 @@ export default function RecurringPage() {
   const [editing, setEditing] = useState<RecurringExpense | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [paidId, setPaidId] = useState<string | null>(null);
+
+  const handleMarkPaid = async (e: RecurringExpense) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    // Create money entry
+    await supabase.from("money_entries").insert({
+      id: crypto.randomUUID(),
+      user_id: user.id,
+      kind: "expense",
+      category: e.category,
+      subcategory: e.description,
+      amount: e.amount,
+      date: new Date().toISOString().split("T")[0],
+      notes: `Despesa recorrente: ${e.category}${e.description ? " - " + e.description : ""}`,
+    });
+    // Update next_due
+    const nextDue = getNextDueDate(e.next_due || new Date().toISOString().split("T")[0], e.frequency);
+    await supabase.from("recurring_expenses").update({ next_due: nextDue }).eq("id", e.id);
+    setPaidId(e.id);
+    setTimeout(() => setPaidId(null), 2000);
+    fetchExpenses();
+  };
 
   const fetchExpenses = useCallback(async () => {
     setLoading(true);
@@ -185,6 +202,14 @@ export default function RecurringPage() {
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 <span className="font-bold text-money-out text-lg">${e.amount.toFixed(2)}</span>
+                {e.is_active && (
+                  <button
+                    onClick={() => handleMarkPaid(e)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${paidId === e.id ? "bg-success/20 text-success" : "bg-accent/20 text-accent hover:bg-accent/30"}`}
+                  >
+                    {paidId === e.id ? <span className="flex items-center gap-1"><CheckCircle size={14} /> Pago!</span> : "💰 Pagar"}
+                  </button>
+                )}
                 <button
                   onClick={() => toggleActive(e)}
                   className="p-2 rounded-lg hover:bg-card text-text-secondary transition-colors"
