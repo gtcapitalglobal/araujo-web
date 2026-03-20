@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Mail, Download, CheckCircle, AlertCircle, Loader2, Link2, FileText, RefreshCw } from "lucide-react";
+import { Mail, Download, CheckCircle, AlertCircle, Loader2, FileText, RefreshCw, Import } from "lucide-react";
 
 interface Attachment {
   filename: string;
@@ -69,6 +69,7 @@ export default function ImportEmailPage() {
           messageId: email.id,
           attachmentId: att.attachmentId,
           filename: att.filename,
+          subject: email.subject,
         }),
       });
 
@@ -77,13 +78,19 @@ export default function ImportEmailPage() {
       if (data.success) {
         setDownloaded((prev) => new Set(prev).add(key));
       } else {
-        setError(data.error || "Erro ao baixar arquivo");
+        setError(data.error || "Erro ao importar arquivo");
       }
     } catch {
-      setError("Erro ao baixar arquivo");
+      setError("Erro ao importar arquivo");
     }
 
     setDownloading(null);
+  };
+
+  const handleImportAll = async (email: Email) => {
+    for (const att of email.attachments) {
+      await handleDownload(email, att);
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -105,6 +112,9 @@ export default function ImportEmailPage() {
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
+
+  const allDownloaded = (email: Email) =>
+    email.attachments.every((att) => downloaded.has(`${email.id}_${att.attachmentId}`));
 
   return (
     <div>
@@ -136,7 +146,6 @@ export default function ImportEmailPage() {
           <Loader2 size={32} className="text-primary animate-spin" />
         </div>
       ) : !connected ? (
-        /* Connect Screen */
         <div className="flex flex-col items-center justify-center py-20">
           <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
             <Mail size={40} className="text-primary" />
@@ -158,10 +167,8 @@ export default function ImportEmailPage() {
             </svg>
             Conectar com Google
           </button>
-          <p className="text-text-muted text-xs mt-4">Acesso somente leitura — não modificamos seu email</p>
         </div>
       ) : (
-        /* Email List */
         <div>
           <div className="flex items-center gap-2 mb-6">
             <div className="w-2.5 h-2.5 bg-success rounded-full animate-pulse" />
@@ -179,17 +186,43 @@ export default function ImportEmailPage() {
             <div className="space-y-4">
               {emails.map((email) => (
                 <div key={email.id} className="bg-surface border border-border rounded-2xl p-5 card-glow">
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-text text-sm">{email.subject}</h3>
+                      <h3 className="font-semibold text-text">{email.subject}</h3>
                       <p className="text-text-muted text-xs mt-1">
                         {email.from} • {formatDate(email.date)}
                       </p>
                     </div>
+
+                    {/* Main Import Button */}
+                    {email.attachments.length > 0 && !allDownloaded(email) ? (
+                      <button
+                        onClick={() => handleImportAll(email)}
+                        disabled={downloading !== null}
+                        className="flex items-center gap-2 bg-gradient-to-r from-accent to-legendary text-bg font-bold py-3 px-6 rounded-xl hover:scale-[1.02] transition-transform disabled:opacity-50 shrink-0"
+                      >
+                        {downloading ? (
+                          <Loader2 size={18} className="animate-spin" />
+                        ) : (
+                          <Import size={18} />
+                        )}
+                        {downloading ? "Importando..." : "Importar"}
+                      </button>
+                    ) : allDownloaded(email) ? (
+                      <div className="flex items-center gap-2 text-success font-bold py-3 px-6 bg-success/10 rounded-xl shrink-0">
+                        <CheckCircle size={18} />
+                        Importado
+                      </div>
+                    ) : (
+                      <span className="text-text-muted text-xs py-3 px-4 bg-card rounded-xl shrink-0">
+                        Sem PDF anexado
+                      </span>
+                    )}
                   </div>
 
+                  {/* Attachment Details */}
                   {email.attachments.length > 0 && (
-                    <div className="space-y-2 mt-3 pt-3 border-t border-border">
+                    <div className="space-y-2 mt-4 pt-3 border-t border-border">
                       {email.attachments.map((att) => {
                         const key = `${email.id}_${att.attachmentId}`;
                         const isDownloaded = downloaded.has(key);
@@ -198,7 +231,7 @@ export default function ImportEmailPage() {
                         return (
                           <div key={att.attachmentId} className="flex items-center justify-between bg-card rounded-xl p-3">
                             <div className="flex items-center gap-3">
-                              <FileText size={18} className="text-error" />
+                              <FileText size={18} className={isDownloaded ? "text-success" : "text-error"} />
                               <div>
                                 <p className="text-sm font-medium text-text">{att.filename}</p>
                                 <p className="text-xs text-text-muted">{formatSize(att.size)}</p>
@@ -206,22 +239,22 @@ export default function ImportEmailPage() {
                             </div>
 
                             {isDownloaded ? (
-                              <div className="flex items-center gap-2 text-success text-sm font-semibold">
-                                <CheckCircle size={16} />
+                              <div className="flex items-center gap-1.5 text-success text-xs font-semibold">
+                                <CheckCircle size={14} />
                                 Salvo
                               </div>
                             ) : (
                               <button
                                 onClick={() => handleDownload(email, att)}
                                 disabled={isDownloading}
-                                className="flex items-center gap-2 bg-gradient-to-r from-accent to-legendary text-bg font-bold py-2 px-4 rounded-lg text-xs hover:scale-[1.02] transition-transform disabled:opacity-50"
+                                className="flex items-center gap-1.5 text-accent text-xs font-semibold hover:text-legendary transition disabled:opacity-50"
                               >
                                 {isDownloading ? (
                                   <Loader2 size={14} className="animate-spin" />
                                 ) : (
                                   <Download size={14} />
                                 )}
-                                {isDownloading ? "Salvando..." : "Salvar no Sistema"}
+                                {isDownloading ? "Salvando..." : "Salvar"}
                               </button>
                             )}
                           </div>

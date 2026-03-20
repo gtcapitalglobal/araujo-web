@@ -10,7 +10,6 @@ async function getAccessToken(): Promise<string | null> {
 
   if (accessToken) return accessToken;
 
-  // Try refresh
   const refreshToken = cookieStore.get("gmail_refresh_token")?.value;
   if (!refreshToken) return null;
 
@@ -39,6 +38,32 @@ async function getAccessToken(): Promise<string | null> {
   return data.access_token;
 }
 
+interface Part {
+  filename?: string;
+  mimeType?: string;
+  body?: { attachmentId?: string; size?: number };
+  parts?: Part[];
+}
+
+function findPdfAttachments(parts: Part[]): { filename: string; attachmentId: string; size: number }[] {
+  const results: { filename: string; attachmentId: string; size: number }[] = [];
+
+  for (const part of parts) {
+    if (part.filename && part.filename.toLowerCase().endsWith(".pdf") && part.body?.attachmentId) {
+      results.push({
+        filename: part.filename,
+        attachmentId: part.body.attachmentId,
+        size: part.body.size || 0,
+      });
+    }
+    if (part.parts) {
+      results.push(...findPdfAttachments(part.parts));
+    }
+  }
+
+  return results;
+}
+
 export async function GET() {
   const token = await getAccessToken();
   if (!token) {
@@ -46,7 +71,6 @@ export async function GET() {
   }
 
   try {
-    // Search for emails from USIG with attachments
     const query = encodeURIComponent("from:service@us-installations.com has:attachment filename:pdf");
     const listRes = await fetch(
       `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${query}&maxResults=20`,
@@ -59,11 +83,10 @@ export async function GET() {
       return NextResponse.json({ emails: [] });
     }
 
-    // Fetch details for each message
     const emails = await Promise.all(
       listData.messages.slice(0, 20).map(async (msg: { id: string }) => {
         const msgRes = await fetch(
-          `https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=Date&metadataHeaders=From`,
+          `https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=full`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const msgData = await msgRes.json();
@@ -73,15 +96,12 @@ export async function GET() {
         const date = headers.find((h: { name: string }) => h.name === "Date")?.value || "";
         const from = headers.find((h: { name: string }) => h.name === "From")?.value || "";
 
-        // Get attachment info
-        const parts = msgData.payload?.parts || [];
-        const attachments = parts
-          .filter((p: { filename: string; mimeType: string }) => p.filename && p.mimeType === "application/pdf")
-          .map((p: { filename: string; body: { attachmentId: string; size: number } }) => ({
-            filename: p.filename,
-            attachmentId: p.body?.attachmentId,
-            size: p.body?.size || 0,
-          }));
+        // Recursively find PDF attachments in all parts
+        const allParts: Part[] = msgData.payload?.parts || [];
+        if (msgData.payload?.filename && msgData.payload?.body?.attachmentId) {
+          allParts.push(msgData.payload);
+        }
+        const attachments = findPdfAttachments(allParts);
 
         return {
           id: msg.id,
