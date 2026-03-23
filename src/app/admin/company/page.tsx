@@ -268,48 +268,91 @@ export default function CompanyPage() {
         <textarea value={form.notes} onChange={(e) => update("notes", e.target.value)} rows={3} className={`${inputClass} resize-none`} />
       </div>
 
-      {/* Save Button + WhatsApp Share */}
-      <div className="flex items-center gap-4 mb-10 flex-wrap">
+      {/* Save Button */}
+      <div className="flex items-center gap-4 mb-6 flex-wrap">
         <button onClick={handleSaveInfo} disabled={savingInfo} className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white font-bold px-8 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50">
           <Save size={18} /> {savingInfo ? "Salvando..." : "Salvar Dados"}
         </button>
-        <button
-          onClick={() => {
-            const lines = [
-              `*${form.legal_name || "Araujo Company LLC"}*`,
-              `Payment info:`,
-              `👉 https://www.araujocompany.com/pay`,
-            ].join("\n");
-            window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
-          }}
-          className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold px-6 py-3 rounded-xl transition"
-        >
-          <Share2 size={18} /> Enviar Pagamento via WhatsApp
-        </button>
-        <button
-          onClick={() => {
-            const lines = [
-              `*${form.legal_name || "Araujo Company LLC"}*`,
-              form.phone ? `📱 ${form.phone}` : "",
-              form.email ? `📧 ${form.email}` : "",
-              form.address_line1 ? `📍 ${form.address_line1}` : "",
-              form.website ? `🕐 ${form.website}` : "",
-              "",
-              form.naics_code ? `📋 NAICS: ${form.naics_code}` : "",
-              form.sic_code ? `📋 SIC: ${form.sic_code}` : "",
-              form.tax_classification ? `🏛️ ${form.tax_classification}` : "",
-              form.license_number ? `📄 License #${form.license_number} — ${form.license_city || ""}${form.license_expiration ? ` (Exp: ${form.license_expiration})` : ""}` : "",
-              form.ein ? `🔢 EIN: ${form.ein}` : "",
-              "",
-              "🌐 araujocompany.com",
-            ].filter(Boolean).join("\n");
-            window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
-          }}
-          className="flex items-center gap-2 bg-surface border border-border text-text-secondary hover:text-text font-bold px-6 py-3 rounded-xl transition"
-        >
-          <Share2 size={18} /> Enviar Dados da Empresa
-        </button>
         {saved && <span className="text-success text-sm font-semibold">Salvo com sucesso!</span>}
+      </div>
+
+      {/* WhatsApp Share Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+        {/* CARD 1: Dados da Empresa */}
+        <div className="bg-surface border border-border rounded-2xl p-6">
+          <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider mb-3">📤 ENVIAR DADOS DA EMPRESA</h2>
+          <p className="text-text-muted text-xs mb-4">Envia nome, contato, endereco, licenca, NAICS, EIN e site via WhatsApp</p>
+          <div className="bg-card rounded-xl p-4 mb-4 text-xs text-text-secondary space-y-1 font-mono">
+            <p className="text-text font-bold">{form.legal_name || "Araujo Company LLC"}</p>
+            {form.phone && <p>📱 {form.phone}</p>}
+            {form.email && <p>📧 {form.email}</p>}
+            {form.address_line1 && <p>📍 {form.address_line1}</p>}
+            {form.naics_code && <p>📋 NAICS: {form.naics_code}</p>}
+            {form.sic_code && <p>📋 SIC: {form.sic_code}</p>}
+            {form.license_number && <p>📄 License #{form.license_number}</p>}
+            {form.ein && <p>🔢 EIN: {form.ein}</p>}
+          </div>
+          <button
+            onClick={() => {
+              const lines = [
+                `*${form.legal_name || "Araujo Company LLC"}*`,
+                form.phone ? `📱 ${form.phone}` : "",
+                form.email ? `📧 ${form.email}` : "",
+                form.address_line1 ? `📍 ${form.address_line1}` : "",
+                form.website ? `🕐 ${form.website}` : "",
+                "",
+                form.naics_code ? `📋 NAICS: ${form.naics_code}` : "",
+                form.sic_code ? `📋 SIC: ${form.sic_code}` : "",
+                form.tax_classification ? `🏛️ ${form.tax_classification}` : "",
+                form.license_number ? `📄 License #${form.license_number} — ${form.license_city || ""}${form.license_expiration ? ` (Exp: ${form.license_expiration})` : ""}` : "",
+                form.ein ? `🔢 EIN: ${form.ein}` : "",
+                form.duns_number ? `🔢 DUNS: ${form.duns_number}` : "",
+                "",
+                "🌐 araujocompany.com",
+              ].filter(Boolean).join("\n");
+              window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
+            }}
+            className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold px-6 py-3 rounded-xl transition"
+          >
+            <Share2 size={18} /> Enviar via WhatsApp
+          </button>
+        </div>
+
+        {/* CARD 2: Pagamento */}
+        <div className="bg-surface border border-border rounded-2xl p-6">
+          <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider mb-3">💰 ENVIAR PAGAMENTO</h2>
+          <p className="text-text-muted text-xs mb-4">Envia link de pagamento e dados bancarios via WhatsApp</p>
+          <div className="bg-card rounded-xl p-4 mb-4 text-xs text-text-secondary space-y-1 font-mono">
+            <p className="text-text font-bold">{form.legal_name || "Araujo Company LLC"}</p>
+            {form.bank_name && <p>🏦 {form.bank_name}</p>}
+            {form.zelle && <p>⚡ Zelle: {form.zelle}</p>}
+            <p>👉 araujocompany.com/pay</p>
+            {form.qr_code_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={form.qr_code_url} alt="QR" className="w-20 h-20 rounded-lg border border-border bg-white p-1 mt-2 object-contain" />
+            )}
+          </div>
+          <button
+            onClick={() => {
+              const lines = [
+                `*${form.legal_name || "Araujo Company LLC"}*`,
+                "",
+                "💰 *Payment Info:*",
+                form.bank_name ? `🏦 Bank: ${form.bank_name}` : "",
+                form.account_number ? `💳 Account: ${form.account_number}` : "",
+                form.routing_ach ? `🔄 Routing (ACH): ${form.routing_ach}` : "",
+                form.routing_wire ? `🔄 Routing (Wire): ${form.routing_wire}` : "",
+                form.zelle ? `⚡ Zelle: ${form.zelle}` : "",
+                "",
+                `👉 https://www.araujocompany.com/pay`,
+              ].filter(Boolean).join("\n");
+              window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
+            }}
+            className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold px-6 py-3 rounded-xl transition"
+          >
+            <Share2 size={18} /> Enviar via WhatsApp
+          </button>
+        </div>
       </div>
 
       {/* Company Contacts */}
