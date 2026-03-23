@@ -14,6 +14,7 @@ const labelClass = "text-xs text-text-muted mb-1 block";
 
 interface InfoForm {
   legal_name: string; ein: string; duns_number: string;
+  naics_code: string; sic_code: string; tax_classification: string; license_number: string; license_expiration: string; license_city: string;
   phone: string; email: string; website: string;
   address_line1: string; address_line2: string; city: string; state: string; zip: string;
   bank_name: string; account_number: string; routing_ach: string; routing_wire: string; bank_branch: string; zelle: string; qr_code_url: string;
@@ -23,6 +24,7 @@ interface InfoForm {
 
 const emptyForm: InfoForm = {
   legal_name: "", ein: "", duns_number: "",
+  naics_code: "", sic_code: "", tax_classification: "", license_number: "", license_expiration: "", license_city: "",
   phone: "", email: "", website: "",
   address_line1: "", address_line2: "", city: "", state: "", zip: "",
   bank_name: "", account_number: "", routing_ach: "", routing_wire: "", bank_branch: "", zelle: "", qr_code_url: "",
@@ -56,6 +58,7 @@ export default function CompanyPage() {
       const d = infoRes.data;
       setForm({
         legal_name: d.legal_name || "", ein: d.ein || "", duns_number: d.duns_number || "",
+        naics_code: d.naics_code || "", sic_code: d.sic_code || "", tax_classification: d.tax_classification || "", license_number: d.license_number || "", license_expiration: d.license_expiration || "", license_city: d.license_city || "",
         phone: d.phone || "", email: d.email || "", website: d.website || "",
         address_line1: d.address_line1 || "", address_line2: d.address_line2 || "", city: d.city || "", state: d.state || "", zip: d.zip || "",
         bank_name: d.bank_name || "", account_number: d.account_number || "", routing_ach: d.routing_ach || "", routing_wire: d.routing_wire || "", bank_branch: d.bank_branch || "", zelle: d.zelle || "", qr_code_url: d.qr_code_url || "",
@@ -135,6 +138,16 @@ export default function CompanyPage() {
           <div><label className={labelClass}>Razao Social</label><input value={form.legal_name} onChange={(e) => update("legal_name", e.target.value)} className={inputClass} /></div>
           <div><label className={labelClass}>EIN (Tax ID)</label><input value={form.ein} onChange={(e) => update("ein", e.target.value)} className={inputClass} /></div>
           <div><label className={labelClass}>DUNS Number</label><input value={form.duns_number} onChange={(e) => update("duns_number", e.target.value)} className={inputClass} /></div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+          <div><label className={labelClass}>NAICS Code</label><input value={form.naics_code} onChange={(e) => update("naics_code", e.target.value)} placeholder="238330" className={inputClass} /></div>
+          <div><label className={labelClass}>SIC Code</label><input value={form.sic_code} onChange={(e) => update("sic_code", e.target.value)} placeholder="1752" className={inputClass} /></div>
+          <div><label className={labelClass}>Tax Classification</label><input value={form.tax_classification} onChange={(e) => update("tax_classification", e.target.value)} placeholder="LLC - Partnership" className={inputClass} /></div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+          <div><label className={labelClass}>License Number</label><input value={form.license_number} onChange={(e) => update("license_number", e.target.value)} placeholder="26-121822" className={inputClass} /></div>
+          <div><label className={labelClass}>License Expiration</label><input value={form.license_expiration} onChange={(e) => update("license_expiration", e.target.value)} placeholder="12/31/2026" className={inputClass} /></div>
+          <div><label className={labelClass}>License City</label><input value={form.license_city} onChange={(e) => update("license_city", e.target.value)} placeholder="Sandy Springs, GA" className={inputClass} /></div>
         </div>
       </div>
 
