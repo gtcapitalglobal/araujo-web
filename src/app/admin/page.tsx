@@ -26,12 +26,16 @@ interface DashboardData {
   upcomingExpenses: { id: string; category: string; description: string | null; amount: number; next_due: string; frequency: string; source: "recurring" | "money" }[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface CompanyData { legal_name?: string; phone?: string; email?: string; address_line1?: string; website?: string; naics_code?: string; sic_code?: string; tax_classification?: string; license_number?: string; license_expiration?: string; license_city?: string; ein?: string; duns_number?: string; bank_name?: string; account_number?: string; routing_ach?: string; routing_wire?: string; zelle?: string; }
+
 export default function AdminDashboard() {
   const supabase = createClient();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState("");
   const [paidId, setPaidId] = useState<string | null>(null);
+  const [company, setCompany] = useState<CompanyData>({});
 
   const handlePayExpense = async (exp: DashboardData["upcomingExpenses"][0]) => {
     if (exp.source === "recurring") {
@@ -117,6 +121,10 @@ export default function AdminDashboard() {
         ...(upcomingMoneyRes.data || []).map((e: any) => ({ id: e.id, category: e.category || "Outro", description: e.notes || null, amount: e.amount, next_due: e.date, frequency: "unica", source: "money" as const })),
       ].sort((a, b) => a.next_due.localeCompare(b.next_due)),
     });
+    // Fetch company info for share buttons
+    const companyRes = await supabase.from("company_info").select("*").limit(1).maybeSingle();
+    if (companyRes.data) setCompany(companyRes.data);
+
     setLoading(false);
   }, [supabase]);
 
@@ -195,8 +203,24 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => {
-            const msg = `*Araujo Company LLC*\nCompany info:\n👉 https://www.araujocompany.com/info`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+            const c = company;
+            const lines = [
+              `*${c.legal_name || "Araujo Company LLC"}*`,
+              c.phone ? `📱 ${c.phone}` : "",
+              c.email ? `📧 ${c.email}` : "",
+              c.address_line1 ? `📍 ${c.address_line1}` : "",
+              c.website ? `🕐 ${c.website}` : "",
+              "",
+              c.naics_code ? `📋 NAICS: ${c.naics_code}` : "",
+              c.sic_code ? `📋 SIC: ${c.sic_code}` : "",
+              c.tax_classification ? `🏛️ ${c.tax_classification}` : "",
+              c.license_number ? `📄 License #${c.license_number} — ${c.license_city || ""}${c.license_expiration ? ` (Exp: ${c.license_expiration})` : ""}` : "",
+              c.ein ? `🔢 EIN: ${c.ein}` : "",
+              c.duns_number ? `🔢 DUNS: ${c.duns_number}` : "",
+              "",
+              "🌐 araujocompany.com",
+            ].filter(Boolean).join("\n");
+            window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
           }}
           className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-3 px-4 rounded-2xl transition hover:scale-[1.01] active:scale-[0.99] text-sm"
         >
@@ -205,8 +229,18 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => {
-            const msg = `Araujo Company LLC\nCompany info:\nhttps://www.araujocompany.com/info`;
-            window.open(`sms:?body=${encodeURIComponent(msg)}`, "_self");
+            const c = company;
+            const lines = [
+              c.legal_name || "Araujo Company LLC",
+              c.phone ? `Phone: ${c.phone}` : "",
+              c.email ? `Email: ${c.email}` : "",
+              c.address_line1 || "",
+              c.naics_code ? `NAICS: ${c.naics_code}` : "",
+              c.license_number ? `License #${c.license_number}` : "",
+              c.ein ? `EIN: ${c.ein}` : "",
+              "araujocompany.com",
+            ].filter(Boolean).join("\n");
+            window.open(`sms:?body=${encodeURIComponent(lines)}`, "_self");
           }}
           className="flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-3 px-4 rounded-2xl transition hover:scale-[1.01] active:scale-[0.99] text-sm"
         >
