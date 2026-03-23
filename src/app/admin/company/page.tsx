@@ -295,6 +295,12 @@ export default function CompanyPage() {
               form.address_line1 ? `📍 ${form.address_line1}` : "",
               form.website ? `🕐 ${form.website}` : "",
               "",
+              form.naics_code ? `📋 NAICS: ${form.naics_code}` : "",
+              form.sic_code ? `📋 SIC: ${form.sic_code}` : "",
+              form.tax_classification ? `🏛️ ${form.tax_classification}` : "",
+              form.license_number ? `📄 License #${form.license_number} — ${form.license_city || ""}${form.license_expiration ? ` (Exp: ${form.license_expiration})` : ""}` : "",
+              form.ein ? `🔢 EIN: ${form.ein}` : "",
+              "",
               "🌐 araujocompany.com",
             ].filter(Boolean).join("\n");
             window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
