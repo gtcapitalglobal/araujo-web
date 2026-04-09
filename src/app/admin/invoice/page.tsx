@@ -17,8 +17,10 @@ interface InvoiceLine {
 
 interface SavedInvoice {
   id: string;
+  invoice_number: string;
   week_of: string;
   bill_to: string;
+  installer_name: string;
   total: number;
   created_at: string;
 }
@@ -75,7 +77,7 @@ export default function InvoicePage() {
     if (!user) { setLoading(false); return; }
     const { data, error } = await supabase
       .from("invoices")
-      .select("id, week_of, bill_to, total, created_at")
+      .select("id, invoice_number, week_of, bill_to, installer_name, total, created_at")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
     if (error) console.error("fetch error:", error);
@@ -313,11 +315,18 @@ export default function InvoicePage() {
                 onClick={() => loadInvoice(inv.id)}
                 className="glass rounded-xl p-4 flex items-center justify-between cursor-pointer hover:border-primary/40 transition-all"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-1">
                   <FileText className="text-primary" size={22} />
-                  <div>
-                    <p className="text-text font-bold">{inv.week_of ? `Semana ${inv.week_of}` : "Invoice"}</p>
-                    <p className="text-text-muted text-xs">{inv.bill_to || "Sem destinatario"}</p>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-text font-bold">Invoice #{inv.invoice_number || "—"}</p>
+                      {inv.week_of && <span className="text-text-muted text-xs">| Week {inv.week_of}</span>}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-text-muted mt-0.5">
+                      <span>{inv.bill_to || "Sem destinatario"}</span>
+                      {inv.installer_name && <span>• {inv.installer_name}</span>}
+                      <span>• {new Date(inv.created_at).toLocaleDateString("pt-BR")}</span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
