@@ -397,11 +397,11 @@ export default function InvoicePage() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-text-muted text-[10px] font-bold w-16 shrink-0">Bill To:</span>
-            <input className="cell-input flex-1" value={billTo} onChange={(e) => setBillTo(e.target.value)} placeholder="Atlanta" />
+            <input className="cell-input flex-1" value={billTo} onChange={(e) => setBillTo(e.target.value)} placeholder="" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-text-muted text-[10px] font-bold w-20 shrink-0">Installer:</span>
-            <input className="cell-input flex-1" value={installerName} onChange={(e) => setInstallerName(e.target.value)} placeholder="Nathan Felipe M Araujo" />
+            <input className="cell-input flex-1" value={installerName} onChange={(e) => setInstallerName(e.target.value)} placeholder="" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-text-muted text-[10px] font-bold w-16 shrink-0">Phone:</span>
@@ -409,7 +409,7 @@ export default function InvoicePage() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-text-muted text-[10px] font-bold w-20 shrink-0">City, ST ZIP:</span>
-            <input className="cell-input flex-1" value={cityStZip} onChange={(e) => setCityStZip(e.target.value)} placeholder="Sandy Springs" />
+            <input className="cell-input flex-1" value={cityStZip} onChange={(e) => setCityStZip(e.target.value)} placeholder="" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-text-muted text-[10px] font-bold w-16 shrink-0">Email:</span>
@@ -417,7 +417,7 @@ export default function InvoicePage() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-text-muted text-[10px] font-bold w-20 shrink-0">Invoice #:</span>
-            <input className="cell-input w-20" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="#" />
+            <input className="cell-input w-20" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="" />
             <span className="text-text-muted text-[10px] font-bold ml-2">Week of:</span>
             <input className="cell-input flex-1" value={weekOf} onChange={(e) => setWeekOf(e.target.value)} placeholder="" />
           </div>
