@@ -138,6 +138,10 @@ export default function InvoicePage() {
 
   // ===== Save =====
   const saveInvoice = async () => {
+    if (!invoiceNumber.trim()) {
+      alert("Preencha o Invoice # antes de salvar.");
+      return;
+    }
     setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
