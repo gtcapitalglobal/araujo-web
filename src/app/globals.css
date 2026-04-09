@@ -119,6 +119,33 @@ body {
   border: 1px solid rgba(123,47,190,0.15);
 }
 
+/* Invoice cell inputs */
+.cell-input {
+  background: rgba(10,10,27,0.5);
+  border: 1px solid rgba(123,47,190,0.1);
+  border-radius: 4px;
+  padding: 3px 6px;
+  color: #fff;
+  font-size: 12px;
+  outline: none;
+}
+.cell-input:focus {
+  border-color: rgba(123,47,190,0.4);
+}
+.cell-input::placeholder {
+  color: rgba(107,107,141,0.5);
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #7B2FBE, #00D4FF);
+  color: #fff;
+}
+.btn-gold {
+  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  color: #0A0A1B;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

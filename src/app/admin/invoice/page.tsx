@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { USIG_PRICE_SHEET, lookupByCode, searchItems, type PriceItem } from "@/lib/usigPriceSheet";
-import { FileText, Plus, Trash2, Save, Download, Search, Tag, ArrowLeft, X } from "lucide-react";
+import { FileText, Plus, Trash2, Save, Download, Search, Tag, ArrowLeft, X, Table, LayoutGrid } from "lucide-react";
 
 interface InvoiceLine {
   id: string;
@@ -55,6 +55,9 @@ export default function InvoicePage() {
 
   // Lines
   const [lines, setLines] = useState<InvoiceLine[]>([emptyLine(), emptyLine(), emptyLine()]);
+
+  // Layout toggle
+  const [layout, setLayout] = useState<"table" | "cards">("table");
 
   // Catalog modal
   const [showCatalog, setShowCatalog] = useState(false);
@@ -362,6 +365,20 @@ export default function InvoicePage() {
           <h1 className="text-lg font-black gradient-text-gold tracking-wider">INVOICE</h1>
         </div>
         <div className="flex items-center gap-2">
+          <div className="flex items-center bg-surface/80 rounded-lg border border-primary/10 p-0.5 mr-1">
+            <button
+              onClick={() => setLayout("table")}
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition ${layout === "table" ? "bg-primary/20 text-accent" : "text-text-muted hover:text-text"}`}
+            >
+              <Table size={12} /> Tabela
+            </button>
+            <button
+              onClick={() => setLayout("cards")}
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition ${layout === "cards" ? "bg-primary/20 text-accent" : "text-text-muted hover:text-text"}`}
+            >
+              <LayoutGrid size={12} /> Cards
+            </button>
+          </div>
           <button onClick={saveInvoice} disabled={saving} className="btn-primary flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs">
             <Save size={14} /> {saving ? "..." : "SALVAR"}
           </button>
@@ -407,8 +424,8 @@ export default function InvoicePage() {
         </div>
       </div>
 
-      {/* Spreadsheet table */}
-      <div className="glass rounded-xl overflow-hidden mb-3">
+      {/* ===== TABLE LAYOUT ===== */}
+      {layout === "table" && <div className="glass rounded-xl overflow-hidden mb-3">
         <div className="overflow-x-auto">
           <table className="w-full text-xs border-collapse">
             <thead>
@@ -482,7 +499,56 @@ export default function InvoicePage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </div>}
+
+      {/* ===== CARDS LAYOUT ===== */}
+      {layout === "cards" && <>
+        <div className="glass rounded-xl p-3 mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-secondary text-[10px] font-bold tracking-widest">ITENS</p>
+            <button onClick={() => setLines((p) => [...p, emptyLine()])} className="flex items-center gap-1 text-accent text-[11px] font-bold hover:text-accent/80 transition">
+              <Plus size={14} /> Linha
+            </button>
+          </div>
+          <div className="space-y-2">
+            {lines.map((line, i) => (
+              <div key={line.id} className="bg-surface/60 border border-primary/10 rounded-lg p-2.5">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-primary text-[10px] font-black">#{i + 1}</span>
+                  <div className="flex items-center gap-1.5">
+                    <button onClick={() => openCatalog(line.id)} className="flex items-center gap-1 text-accent bg-accent/10 px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-accent/20 transition">
+                      <Tag size={10} /> USIG
+                    </button>
+                    {lines.length > 1 && (
+                      <button onClick={() => setLines((p) => p.filter((l) => l.id !== line.id))} className="text-text-muted hover:text-error transition">
+                        <Trash2 size={12} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
+                  <CardField label="Date" value={line.date} onChange={(v) => updateLine(line.id, "date", v)} placeholder="3/19/26" />
+                  <CardField label="PO/Auth #" value={line.poAuth} onChange={(v) => updateLine(line.id, "poAuth", v)} placeholder="" />
+                  <CardField label="Name" value={line.name} onChange={(v) => updateLine(line.id, "name", v)} placeholder="" />
+                  <CardField label="Description" value={line.description} onChange={(v) => handleDescChange(line.id, v)} placeholder="codigo USIG" />
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 mt-1.5">
+                  <CardField label="QTY" value={line.qty} onChange={(v) => updateLine(line.id, "qty", v)} placeholder="0" type="number" />
+                  <CardField label="Unit Price $" value={line.unitPrice} onChange={(v) => updateLine(line.id, "unitPrice", v)} placeholder="0.00" type="number" />
+                  <div>
+                    <p className="text-text-muted text-[9px] font-bold uppercase mb-0.5">SubTotal</p>
+                    <p className="text-secondary font-bold text-sm">${fmt(calcSub(line))}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="glass rounded-lg p-3 mb-3 flex items-center justify-between border border-accent/30">
+          <span className="text-accent font-black text-sm tracking-wider">Total Invoice:</span>
+          <span className="text-accent font-black text-xl">${fmt(total)}</span>
+        </div>
+      </>}
     </div>
   );
 }
@@ -498,6 +564,22 @@ function Field({ label, value, onChange, placeholder }: { label: string; value: 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+      />
+    </div>
+  );
+}
+
+function CardField({ label, value, onChange, placeholder, type }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string }) {
+  return (
+    <div>
+      <label className="text-text-muted text-[9px] font-bold uppercase">{label}</label>
+      <input
+        className="w-full bg-bg/60 border border-primary/10 rounded px-2 py-1 text-text text-xs outline-none focus:border-primary/40 transition"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        type={type}
+        step={type === "number" ? "any" : undefined}
       />
     </div>
   );
