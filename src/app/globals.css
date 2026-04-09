@@ -124,9 +124,9 @@ body {
   background: rgba(10,10,27,0.5);
   border: 1px solid rgba(123,47,190,0.1);
   border-radius: 4px;
-  padding: 3px 6px;
+  padding: 8px 8px;
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   outline: none;
 }
 .cell-input[type="date"] {

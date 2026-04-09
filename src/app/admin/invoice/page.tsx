@@ -430,10 +430,10 @@ export default function InvoicePage() {
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr className="bg-surface/80 border-b border-primary/20">
-                <th className="text-text-muted font-bold text-[10px] text-left px-2 py-1.5 w-[70px]">Date</th>
-                <th className="text-text-muted font-bold text-[10px] text-left px-2 py-1.5 w-[80px]">PO/Auth#</th>
-                <th className="text-text-muted font-bold text-[10px] text-left px-2 py-1.5 w-[120px]">Name</th>
-                <th className="text-text-muted font-bold text-[10px] text-left px-2 py-1.5">Description</th>
+                <th className="text-text-muted font-bold text-[11px] text-left px-2 py-2.5 w-[70px]">Date</th>
+                <th className="text-text-muted font-bold text-[11px] text-left px-2 py-2.5 w-[80px]">PO/Auth#</th>
+                <th className="text-text-muted font-bold text-[11px] text-left px-2 py-2.5 w-[120px]">Name</th>
+                <th className="text-text-muted font-bold text-[11px] text-left px-2 py-2.5">Description</th>
                 <th className="text-text-muted font-bold text-[10px] text-right px-2 py-1.5 w-[60px]">QTY</th>
                 <th className="text-text-muted font-bold text-[10px] text-right px-2 py-1.5 w-[75px]">Unit Price</th>
                 <th className="text-text-muted font-bold text-[10px] text-right px-2 py-1.5 w-[80px]">SubTotal</th>
@@ -443,16 +443,16 @@ export default function InvoicePage() {
             <tbody>
               {lines.map((line, i) => (
                 <tr key={line.id} className="border-b border-primary/10 hover:bg-surface/40 transition">
-                  <td className="px-1 py-0.5">
+                  <td className="px-1.5 py-1">
                     <input type="date" className="cell-input w-full text-xs" value={line.date} onChange={(e) => updateLine(line.id, "date", e.target.value)} />
                   </td>
-                  <td className="px-1 py-0.5">
+                  <td className="px-1.5 py-1">
                     <input className="cell-input w-full text-xs" value={line.poAuth} onChange={(e) => updateLine(line.id, "poAuth", e.target.value)} placeholder="" />
                   </td>
-                  <td className="px-1 py-0.5">
+                  <td className="px-1.5 py-1">
                     <input className="cell-input w-full text-xs" value={line.name} onChange={(e) => updateLine(line.id, "name", e.target.value)} placeholder="" />
                   </td>
-                  <td className="px-1 py-0.5">
+                  <td className="px-1.5 py-1">
                     <div className="flex items-center gap-1">
                       <input className="cell-input flex-1 text-xs" value={line.description} onChange={(e) => handleDescChange(line.id, e.target.value)} placeholder="codigo USIG" />
                       <button onClick={() => openCatalog(line.id)} className="text-accent hover:text-accent/80 shrink-0" title="USIG Catalog">
@@ -460,10 +460,10 @@ export default function InvoicePage() {
                       </button>
                     </div>
                   </td>
-                  <td className="px-1 py-0.5">
+                  <td className="px-1.5 py-1">
                     <input className="cell-input w-full text-xs text-right" value={line.qty} onChange={(e) => updateLine(line.id, "qty", e.target.value)} placeholder="0" type="number" step="any" />
                   </td>
-                  <td className="px-1 py-0.5">
+                  <td className="px-1.5 py-1">
                     <input className="cell-input w-full text-xs text-right" value={line.unitPrice} onChange={(e) => updateLine(line.id, "unitPrice", e.target.value)} placeholder="0.00" type="number" step="any" />
                   </td>
                   <td className="px-1 py-0.5 text-right">
