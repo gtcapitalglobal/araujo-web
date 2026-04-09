@@ -35,8 +35,9 @@ const emptyLine = (): InvoiceLine => ({
 
 const fmt = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+const supabase = createClient();
+
 export default function InvoicePage() {
-  const supabase = createClient();
   const [mode, setMode] = useState<"list" | "edit">("list");
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
   const [savedInvoices, setSavedInvoices] = useState<SavedInvoice[]>([]);
@@ -71,15 +72,16 @@ export default function InvoicePage() {
   const fetchInvoices = useCallback(async () => {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data } = await supabase
+    if (!user) { setLoading(false); return; }
+    const { data, error } = await supabase
       .from("invoices")
       .select("id, week_of, bill_to, total, created_at")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
+    if (error) console.error("fetch error:", error);
     setSavedInvoices(data || []);
     setLoading(false);
-  }, [supabase]);
+  }, []);
 
   useEffect(() => { fetchInvoices(); }, [fetchInvoices]);
 
