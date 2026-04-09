@@ -137,34 +137,54 @@ export default function InvoicePage() {
   // ===== Save =====
   const saveInvoice = async () => {
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert("Erro: voce precisa estar logado para salvar.");
+        setSaving(false);
+        return;
+      }
 
-    const payload = {
-      user_id: user.id,
-      company_name: companyName,
-      installer_name: installerName,
-      city_st_zip: cityStZip,
-      invoice_number: invoiceNumber,
-      week_of: weekOf,
-      bill_to: billTo,
-      phone,
-      email,
-      total,
-      updated_at: new Date().toISOString(),
-    };
+      let id = invoiceId;
 
-    let id = invoiceId;
+      if (id) {
+        // Update existing
+        const { error: updErr } = await supabase.from("invoices").update({
+          company_name: companyName,
+          installer_name: installerName,
+          city_st_zip: cityStZip,
+          invoice_number: invoiceNumber,
+          week_of: weekOf,
+          bill_to: billTo,
+          phone,
+          email,
+          total,
+          updated_at: new Date().toISOString(),
+        }).eq("id", id);
+        if (updErr) { alert("Erro ao atualizar: " + updErr.message); setSaving(false); return; }
+        await supabase.from("invoice_lines").delete().eq("invoice_id", id);
+      } else {
+        // Insert new
+        id = crypto.randomUUID();
+        const { error: insErr } = await supabase.from("invoices").insert({
+          id,
+          user_id: user.id,
+          company_name: companyName,
+          installer_name: installerName,
+          city_st_zip: cityStZip,
+          invoice_number: invoiceNumber,
+          week_of: weekOf,
+          bill_to: billTo,
+          phone,
+          email,
+          total,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+        if (insErr) { alert("Erro ao salvar: " + insErr.message); setSaving(false); return; }
+      }
 
-    if (id) {
-      await supabase.from("invoices").update(payload).eq("id", id);
-      await supabase.from("invoice_lines").delete().eq("invoice_id", id);
-    } else {
-      const { data } = await supabase.from("invoices").insert({ ...payload, id: crypto.randomUUID() }).select("id").single();
-      id = data?.id || null;
-    }
-
-    if (id) {
+      // Save lines
       const lineRows = lines.map((l, i) => ({
         id: crypto.randomUUID(),
         invoice_id: id,
@@ -177,13 +197,17 @@ export default function InvoicePage() {
         unit_price: parseFloat(l.unitPrice) || 0,
         subtotal: calcSub(l),
       }));
-      await supabase.from("invoice_lines").insert(lineRows);
-      setInvoiceId(id);
-    }
+      const { error: lineErr } = await supabase.from("invoice_lines").insert(lineRows);
+      if (lineErr) { alert("Erro nas linhas: " + lineErr.message); setSaving(false); return; }
 
-    await fetchInvoices();
-    setSaving(false);
-    alert("Invoice salva!");
+      setInvoiceId(id);
+      await fetchInvoices();
+      setSaving(false);
+      alert("Invoice salva!");
+    } catch (err: any) {
+      alert("Erro inesperado: " + err.message);
+      setSaving(false);
+    }
   };
 
   // ===== Delete =====
