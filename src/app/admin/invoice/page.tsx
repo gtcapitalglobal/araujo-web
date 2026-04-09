@@ -45,11 +45,11 @@ export default function InvoicePage() {
 
   // Header
   const [companyName, setCompanyName] = useState("ARAUJO COMPANY LLC");
-  const [installerName, setInstallerName] = useState("");
-  const [cityStZip, setCityStZip] = useState("");
+  const [installerName, setInstallerName] = useState("NATHAN FELIPE M ARAUJO");
+  const [cityStZip, setCityStZip] = useState("SANDY SPRINGS");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [weekOf, setWeekOf] = useState("");
-  const [billTo, setBillTo] = useState("");
+  const [billTo, setBillTo] = useState("Atlanta");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
 
@@ -123,11 +123,11 @@ export default function InvoicePage() {
   const newInvoice = () => {
     setInvoiceId(null);
     setCompanyName("ARAUJO COMPANY LLC");
-    setInstallerName("");
-    setCityStZip("");
+    setInstallerName("NATHAN FELIPE M ARAUJO");
+    setCityStZip("SANDY SPRINGS");
     setInvoiceNumber("");
     setWeekOf("");
-    setBillTo("");
+    setBillTo("Atlanta");
     setPhone("");
     setEmail("");
     setLines([emptyLine(), emptyLine(), emptyLine()]);
