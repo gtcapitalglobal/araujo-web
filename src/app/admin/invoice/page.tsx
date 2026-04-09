@@ -312,14 +312,14 @@ export default function InvoicePage() {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center">
           <div className="bg-bg border border-primary/20 rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-primary/10">
-              <h2 className="text-accent font-black tracking-wider">USIG PRICE SHEET</h2>
-              <button onClick={() => setShowCatalog(false)} className="text-text-muted hover:text-text"><X size={22} /></button>
+              <h2 className="text-accent font-black tracking-wider text-sm">USIG PRICE SHEET</h2>
+              <button onClick={() => setShowCatalog(false)} className="text-text-muted hover:text-text"><X size={18} /></button>
             </div>
-            <div className="p-3 border-b border-primary/10">
-              <div className="flex items-center gap-2 glass rounded-xl px-3">
-                <Search size={16} className="text-text-muted" />
+            <div className="p-2 border-b border-primary/10">
+              <div className="flex items-center gap-2 glass rounded-lg px-2">
+                <Search size={14} className="text-text-muted" />
                 <input
-                  className="bg-transparent text-text w-full py-2.5 text-sm outline-none placeholder:text-text-muted"
+                  className="bg-transparent text-text w-full py-2 text-xs outline-none placeholder:text-text-muted"
                   placeholder="Buscar codigo ou descricao..."
                   value={catalogSearch}
                   onChange={(e) => setCatalogSearch(e.target.value)}
@@ -327,23 +327,23 @@ export default function InvoicePage() {
                 />
               </div>
             </div>
-            <div className="overflow-y-auto flex-1 p-3 space-y-1">
+            <div className="overflow-y-auto flex-1 p-2 space-y-0.5">
               {filtered.map((item) => (
                 <button
                   key={item.code + item.category}
                   onClick={() => selectItem(item)}
-                  className="w-full flex items-center justify-between glass rounded-lg p-3 hover:border-primary/40 transition text-left"
+                  className="w-full flex items-center justify-between glass rounded-md px-2 py-1.5 hover:border-primary/40 transition text-left"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-primary font-black text-sm w-10">{item.code}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-primary font-black text-xs w-9">{item.code}</span>
                     <div>
-                      <p className="text-text text-sm font-medium">{item.description}</p>
-                      <p className="text-text-muted text-[10px]">{item.category}</p>
+                      <p className="text-text text-xs">{item.description}</p>
+                      <p className="text-text-muted text-[9px]">{item.category}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-accent font-black">${item.price.toFixed(2)}</span>
-                    <span className="text-text-muted text-[10px] ml-1">/{item.unit}</span>
+                  <div className="text-right shrink-0">
+                    <span className="text-accent font-bold text-xs">${item.price.toFixed(2)}</span>
+                    <span className="text-text-muted text-[9px] ml-0.5">/{item.unit}</span>
                   </div>
                 </button>
               ))}
@@ -352,97 +352,136 @@ export default function InvoicePage() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => { setMode("list"); fetchInvoices(); }} className="text-text-muted hover:text-text transition">
-          <ArrowLeft size={22} />
-        </button>
-        <FileText className="text-accent" size={28} />
-        <h1 className="text-2xl font-black gradient-text-gold tracking-wider">INVOICE</h1>
+      {/* Top bar */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <button onClick={() => { setMode("list"); fetchInvoices(); }} className="text-text-muted hover:text-text transition">
+            <ArrowLeft size={18} />
+          </button>
+          <FileText className="text-accent" size={20} />
+          <h1 className="text-lg font-black gradient-text-gold tracking-wider">INVOICE</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={saveInvoice} disabled={saving} className="btn-primary flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs">
+            <Save size={14} /> {saving ? "..." : "SALVAR"}
+          </button>
+          <button onClick={exportPDF} className="btn-gold flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs">
+            <Download size={14} /> PDF
+          </button>
+        </div>
       </div>
 
-      {/* Company Info */}
-      <div className="glass rounded-2xl p-5 mb-4">
-        <p className="text-secondary text-xs font-bold tracking-widest mb-3">DADOS DA EMPRESA</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Field label="Company" value={companyName} onChange={setCompanyName} />
-          <Field label="Installer" value={installerName} onChange={setInstallerName} placeholder="Nome do instalador" />
-          <Field label="City, ST ZIP" value={cityStZip} onChange={setCityStZip} placeholder="Sandy Springs, GA 30328" />
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Invoice #" value={invoiceNumber} onChange={setInvoiceNumber} placeholder="#001" />
-            <Field label="Week of" value={weekOf} onChange={setWeekOf} placeholder="03/19/2026" />
+      {/* Header - compact 2-column like the paper */}
+      <div className="glass rounded-xl p-3 mb-3">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-text-muted text-[10px] font-bold w-20 shrink-0">Company:</span>
+            <input className="cell-input flex-1" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-text-muted text-[10px] font-bold w-16 shrink-0">Bill To:</span>
+            <input className="cell-input flex-1" value={billTo} onChange={(e) => setBillTo(e.target.value)} placeholder="Atlanta" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-text-muted text-[10px] font-bold w-20 shrink-0">Installer:</span>
+            <input className="cell-input flex-1" value={installerName} onChange={(e) => setInstallerName(e.target.value)} placeholder="Nathan Felipe M Araujo" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-text-muted text-[10px] font-bold w-16 shrink-0">Phone:</span>
+            <input className="cell-input flex-1" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-text-muted text-[10px] font-bold w-20 shrink-0">City, ST ZIP:</span>
+            <input className="cell-input flex-1" value={cityStZip} onChange={(e) => setCityStZip(e.target.value)} placeholder="Sandy Springs" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-text-muted text-[10px] font-bold w-16 shrink-0">Email:</span>
+            <input className="cell-input flex-1" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-text-muted text-[10px] font-bold w-20 shrink-0">Invoice #:</span>
+            <input className="cell-input w-20" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="#" />
+            <span className="text-text-muted text-[10px] font-bold ml-2">Week of:</span>
+            <input className="cell-input flex-1" value={weekOf} onChange={(e) => setWeekOf(e.target.value)} placeholder="" />
           </div>
         </div>
       </div>
 
-      {/* Bill To */}
-      <div className="glass rounded-2xl p-5 mb-4">
-        <p className="text-secondary text-xs font-bold tracking-widest mb-3">COBRAR DE</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Field label="Bill To" value={billTo} onChange={setBillTo} placeholder="Nome / Empresa" />
-          <Field label="Phone" value={phone} onChange={setPhone} placeholder="(404) 000-0000" />
-          <Field label="Email" value={email} onChange={setEmail} placeholder="email@email.com" />
-        </div>
-      </div>
-
-      {/* Line Items */}
-      <div className="glass rounded-2xl p-5 mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-secondary text-xs font-bold tracking-widest">ITENS</p>
-          <button onClick={() => setLines((p) => [...p, emptyLine()])} className="flex items-center gap-1 text-accent text-sm font-bold hover:text-accent/80 transition">
-            <Plus size={18} /> Linha
-          </button>
-        </div>
-
-        <div className="space-y-3">
-          {lines.map((line, i) => (
-            <div key={line.id} className="bg-surface/60 border border-primary/10 rounded-xl p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-primary text-xs font-black">#{i + 1}</span>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => openCatalog(line.id)} className="flex items-center gap-1 text-accent bg-accent/10 px-2 py-0.5 rounded text-[11px] font-bold hover:bg-accent/20 transition">
-                    <Tag size={12} /> USIG
+      {/* Spreadsheet table */}
+      <div className="glass rounded-xl overflow-hidden mb-3">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="bg-surface/80 border-b border-primary/20">
+                <th className="text-text-muted font-bold text-[10px] text-left px-2 py-1.5 w-[70px]">Date</th>
+                <th className="text-text-muted font-bold text-[10px] text-left px-2 py-1.5 w-[80px]">PO/Auth#</th>
+                <th className="text-text-muted font-bold text-[10px] text-left px-2 py-1.5 w-[120px]">Name</th>
+                <th className="text-text-muted font-bold text-[10px] text-left px-2 py-1.5">Description</th>
+                <th className="text-text-muted font-bold text-[10px] text-right px-2 py-1.5 w-[60px]">QTY</th>
+                <th className="text-text-muted font-bold text-[10px] text-right px-2 py-1.5 w-[75px]">Unit Price</th>
+                <th className="text-text-muted font-bold text-[10px] text-right px-2 py-1.5 w-[80px]">SubTotal</th>
+                <th className="text-text-muted font-bold text-[10px] text-center px-1 py-1.5 w-[50px]"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {lines.map((line, i) => (
+                <tr key={line.id} className="border-b border-primary/10 hover:bg-surface/40 transition">
+                  <td className="px-1 py-0.5">
+                    <input className="cell-input w-full text-xs" value={line.date} onChange={(e) => updateLine(line.id, "date", e.target.value)} placeholder="3/19/26" />
+                  </td>
+                  <td className="px-1 py-0.5">
+                    <input className="cell-input w-full text-xs" value={line.poAuth} onChange={(e) => updateLine(line.id, "poAuth", e.target.value)} placeholder="" />
+                  </td>
+                  <td className="px-1 py-0.5">
+                    <input className="cell-input w-full text-xs" value={line.name} onChange={(e) => updateLine(line.id, "name", e.target.value)} placeholder="" />
+                  </td>
+                  <td className="px-1 py-0.5">
+                    <div className="flex items-center gap-1">
+                      <input className="cell-input flex-1 text-xs" value={line.description} onChange={(e) => handleDescChange(line.id, e.target.value)} placeholder="codigo USIG" />
+                      <button onClick={() => openCatalog(line.id)} className="text-accent hover:text-accent/80 shrink-0" title="USIG Catalog">
+                        <Tag size={12} />
+                      </button>
+                    </div>
+                  </td>
+                  <td className="px-1 py-0.5">
+                    <input className="cell-input w-full text-xs text-right" value={line.qty} onChange={(e) => updateLine(line.id, "qty", e.target.value)} placeholder="0" type="number" step="any" />
+                  </td>
+                  <td className="px-1 py-0.5">
+                    <input className="cell-input w-full text-xs text-right" value={line.unitPrice} onChange={(e) => updateLine(line.id, "unitPrice", e.target.value)} placeholder="0.00" type="number" step="any" />
+                  </td>
+                  <td className="px-1 py-0.5 text-right">
+                    <span className="text-secondary font-bold text-xs">${fmt(calcSub(line))}</span>
+                  </td>
+                  <td className="px-1 py-0.5 text-center">
+                    {lines.length > 1 && (
+                      <button onClick={() => setLines((p) => p.filter((l) => l.id !== line.id))} className="text-text-muted hover:text-error transition">
+                        <Trash2 size={12} />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {/* Add line row */}
+              <tr className="border-b border-primary/10">
+                <td colSpan={8} className="px-2 py-1">
+                  <button onClick={() => setLines((p) => [...p, emptyLine()])} className="flex items-center gap-1 text-accent text-[11px] font-bold hover:text-accent/80 transition">
+                    <Plus size={12} /> Adicionar linha
                   </button>
-                  {lines.length > 1 && (
-                    <button onClick={() => setLines((p) => p.filter((l) => l.id !== line.id))} className="text-text-muted hover:text-error transition">
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <Mini label="Date" value={line.date} onChange={(v) => updateLine(line.id, "date", v)} placeholder="3/19/26" />
-                <Mini label="PO/Auth #" value={line.poAuth} onChange={(v) => updateLine(line.id, "poAuth", v)} placeholder="64148784" />
-                <Mini label="Name" value={line.name} onChange={(v) => updateLine(line.id, "name", v)} placeholder="Nome do cliente" />
-                <Mini label="Description (codigo USIG)" value={line.description} onChange={(v) => handleDescChange(line.id, v)} placeholder="0238 BSC Vinyl" />
-              </div>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                <Mini label="QTY" value={line.qty} onChange={(v) => updateLine(line.id, "qty", v)} placeholder="0" type="number" />
-                <Mini label="Unit Price $" value={line.unitPrice} onChange={(v) => updateLine(line.id, "unitPrice", v)} placeholder="0.00" type="number" />
-                <div>
-                  <p className="text-text-muted text-[10px] font-bold uppercase tracking-wide mb-0.5">SubTotal</p>
-                  <p className="text-secondary font-bold text-lg">${fmt(calcSub(line))}</p>
-                </div>
-              </div>
-            </div>
-          ))}
+                </td>
+              </tr>
+              {/* Total row */}
+              <tr className="bg-surface/80">
+                <td colSpan={6} className="px-2 py-2 text-right">
+                  <span className="text-accent font-black text-sm tracking-wider">Total Invoice:</span>
+                </td>
+                <td className="px-2 py-2 text-right">
+                  <span className="text-accent font-black text-base">${fmt(total)}</span>
+                </td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-
-      {/* Total */}
-      <div className="glass rounded-2xl p-5 mb-4 flex items-center justify-between border-2 border-accent/30">
-        <span className="text-accent font-black text-lg tracking-widest">TOTAL INVOICE</span>
-        <span className="text-accent font-black text-3xl">${fmt(total)}</span>
-      </div>
-
-      {/* Buttons */}
-      <div className="flex gap-3">
-        <button onClick={saveInvoice} disabled={saving} className="flex-1 btn-primary flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm">
-          <Save size={18} /> {saving ? "SALVANDO..." : "SALVAR"}
-        </button>
-        <button onClick={exportPDF} className="flex-1 btn-gold flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm">
-          <Download size={18} /> EXPORTAR PDF
-        </button>
       </div>
     </div>
   );
