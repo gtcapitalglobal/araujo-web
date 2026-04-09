@@ -13,6 +13,8 @@ export const USIG_PRICE_SHEET: PriceItem[] = [
   // VINYL SHEET
   { code: '0051', description: 'BSC Install Vinyl Sheet', price: 6.00, unit: 'sq yd', category: 'Vinyl Sheet' },
   { code: '0931', description: 'Vinyl Sheet Pick up, Delivery Fees', price: 10.00, unit: 'ea', category: 'Vinyl Sheet' },
+  // LAMINATE (additional)
+  { code: '0609', description: 'BSC Laminate Install', price: 1.15, unit: 'sq ft', category: 'Laminate' },
   // HARDWOOD
   { code: '0038', description: 'BSC Prefin Nail Down', price: 1.50, unit: 'sq ft', category: 'Hardwood' },
   { code: '0039', description: 'BSC Prefin Glue Down', price: 1.50, unit: 'sq ft', category: 'Hardwood' },
@@ -68,6 +70,9 @@ export const USIG_PRICE_SHEET: PriceItem[] = [
   { code: '0131', description: 'Remove Ceramic Tile', price: 1.00, unit: 'sq ft', category: 'Removal' },
   { code: '0134', description: 'Remove Glued Sheet Vinyl/Wood Floor', price: 0.65, unit: 'sq ft', category: 'Removal' },
   { code: '0133', description: 'Remove Glued Sheet Vinyl/Concrete', price: 0.35, unit: 'sq ft', category: 'Removal' },
+  // MOISTURE & MISC MATERIALS
+  { code: '3463', description: 'Moisture Block', price: 0.00, unit: 'sq ft', category: 'Materials' },
+  { code: '4469', description: 'Remove Existing 1/4 Round', price: 0.00, unit: 'lf', category: 'Removal' },
   // SUBFLOOR & UNDERLAYMENT
   { code: '0150', description: 'Skim Coat Vinyl/Concrete', price: 0.40, unit: 'sq ft', category: 'Subfloor' },
   { code: '0100', description: 'Embossing Level Existing Vinyl', price: 0.40, unit: 'sq ft', category: 'Subfloor' },

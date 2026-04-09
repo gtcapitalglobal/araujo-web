@@ -227,9 +227,35 @@ export default function InvoicePage() {
     if (invoiceId === id) setMode("list");
   };
 
+  // ===== Period totals =====
+  const now = new Date();
+  const thisMonth = savedInvoices.filter((inv) => {
+    const d = new Date(inv.created_at);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const monthTotal = thisMonth.reduce((s, inv) => s + Number(inv.total), 0);
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay());
+  const thisWeek = savedInvoices.filter((inv) => new Date(inv.created_at) >= weekStart);
+  const weekTotal = thisWeek.reduce((s, inv) => s + Number(inv.total), 0);
+
   // ===== Line helpers =====
   const updateLine = (id: string, field: keyof InvoiceLine, value: string) => {
     setLines((prev) => prev.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
+  };
+
+  // Auto-repeat: when Name is empty, copy from previous line
+  const handleNameChange = (lineId: string, value: string) => {
+    updateLine(lineId, "name", value);
+  };
+  const handleNameBlur = (lineId: string) => {
+    setLines((prev) => {
+      const idx = prev.findIndex((l) => l.id === lineId);
+      if (idx > 0 && !prev[idx].name && prev[idx - 1].name) {
+        return prev.map((l, i) => (i === idx ? { ...l, name: prev[idx - 1].name } : l));
+      }
+      return prev;
+    });
   };
 
   const handleDescChange = (lineId: string, value: string) => {
@@ -298,6 +324,27 @@ export default function InvoicePage() {
             <Plus size={18} /> NOVA INVOICE
           </button>
         </div>
+
+        {/* Period totals */}
+        {savedInvoices.length > 0 && (
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="glass rounded-xl p-3 text-center">
+              <p className="text-text-muted text-[10px] font-bold tracking-wider">SEMANA</p>
+              <p className="text-accent font-black text-lg">${fmt(weekTotal)}</p>
+              <p className="text-text-muted text-[10px]">{thisWeek.length} invoice{thisWeek.length !== 1 ? "s" : ""}</p>
+            </div>
+            <div className="glass rounded-xl p-3 text-center">
+              <p className="text-text-muted text-[10px] font-bold tracking-wider">MES</p>
+              <p className="text-secondary font-black text-lg">${fmt(monthTotal)}</p>
+              <p className="text-text-muted text-[10px]">{thisMonth.length} invoice{thisMonth.length !== 1 ? "s" : ""}</p>
+            </div>
+            <div className="glass rounded-xl p-3 text-center">
+              <p className="text-text-muted text-[10px] font-bold tracking-wider">TOTAL GERAL</p>
+              <p className="text-text font-black text-lg">${fmt(savedInvoices.reduce((s, i) => s + Number(i.total), 0))}</p>
+              <p className="text-text-muted text-[10px]">{savedInvoices.length} invoice{savedInvoices.length !== 1 ? "s" : ""}</p>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <p className="text-text-muted text-center py-12">Carregando...</p>
@@ -480,8 +527,12 @@ export default function InvoicePage() {
               </tr>
             </thead>
             <tbody>
-              {lines.map((line, i) => (
-                <tr key={line.id} className="border-b border-primary/10 hover:bg-surface/40 transition">
+              {lines.map((line, i) => {
+                const hasSub = calcSub(line) > 0;
+                const codeMatch = line.description.match(/^(\d{4})/);
+                const unitLabel = codeMatch ? lookupByCode(codeMatch[1])?.unit : undefined;
+                return (
+                <tr key={line.id} className={`border-b border-primary/10 transition ${hasSub ? "bg-primary/5" : "hover:bg-surface/40"}`}>
                   <td className="px-1.5 py-1">
                     <input type="date" className="cell-input w-full text-xs" value={line.date} onChange={(e) => updateLine(line.id, "date", e.target.value)} />
                   </td>
@@ -489,7 +540,7 @@ export default function InvoicePage() {
                     <input className="cell-input w-full text-xs" value={line.poAuth} onChange={(e) => updateLine(line.id, "poAuth", e.target.value)} placeholder="" />
                   </td>
                   <td className="px-1.5 py-1">
-                    <input className="cell-input w-full text-xs" value={line.name} onChange={(e) => updateLine(line.id, "name", e.target.value)} placeholder="" />
+                    <input className="cell-input w-full text-xs" value={line.name} onChange={(e) => handleNameChange(line.id, e.target.value)} onBlur={() => handleNameBlur(line.id)} placeholder={i > 0 && lines[i-1].name ? `↑ ${lines[i-1].name}` : ""} />
                   </td>
                   <td className="px-1.5 py-1">
                     <div className="flex items-center gap-1">
@@ -503,10 +554,13 @@ export default function InvoicePage() {
                     <input className="cell-input w-full text-xs text-right" value={line.qty} onChange={(e) => updateLine(line.id, "qty", e.target.value)} placeholder="0" inputMode="decimal" />
                   </td>
                   <td className="px-1.5 py-1">
-                    <input className="cell-input w-full text-xs text-right" value={line.unitPrice} onChange={(e) => updateLine(line.id, "unitPrice", e.target.value)} placeholder="0.00" inputMode="decimal" />
+                    <div className="flex items-center gap-1">
+                      <input className="cell-input flex-1 text-xs text-right" value={line.unitPrice} onChange={(e) => updateLine(line.id, "unitPrice", e.target.value)} placeholder="0.00" inputMode="decimal" />
+                      {unitLabel && <span className="text-text-muted text-[9px] shrink-0">/{unitLabel}</span>}
+                    </div>
                   </td>
                   <td className="px-1 py-0.5 text-right">
-                    <span className="text-secondary font-bold text-xs">${fmt(calcSub(line))}</span>
+                    <span className={`font-bold text-xs ${hasSub ? "text-accent" : "text-secondary"}`}>${fmt(calcSub(line))}</span>
                   </td>
                   <td className="px-1 py-0.5 text-center">
                     {lines.length > 1 && (
@@ -516,7 +570,8 @@ export default function InvoicePage() {
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {/* Add line row */}
               <tr className="border-b border-primary/10">
                 <td colSpan={8} className="px-2 py-1">
