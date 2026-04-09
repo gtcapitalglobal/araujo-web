@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   LayoutDashboard, Users, Briefcase, DollarSign, FolderOpen,
   Car, HardHat, BookOpen, Building2, Settings, CheckSquare, LogOut, Menu, X,
-  MessageSquare, Calendar, StickyNote, Bell, BarChart3, RefreshCw, Receipt, Link2, ExternalLink, Mail
+  MessageSquare, Calendar, StickyNote, Bell, BarChart3, RefreshCw, Receipt, Link2, ExternalLink, Mail, FileText
 } from "lucide-react";
 import { useState } from "react";
 
@@ -30,6 +30,7 @@ const navSections = [
   {
     title: "FINANCEIRO",
     items: [
+      { href: "/admin/invoice", icon: FileText, label: "Invoice" },
       { href: "/admin/money", icon: DollarSign, label: "Financeiro" },
       { href: "/admin/recurring", icon: RefreshCw, label: "Recorrentes" },
       { href: "/admin/mileage", icon: Car, label: "Quilometragem" },
