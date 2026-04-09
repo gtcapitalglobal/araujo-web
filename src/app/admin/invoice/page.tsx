@@ -461,10 +461,10 @@ export default function InvoicePage() {
                     </div>
                   </td>
                   <td className="px-1.5 py-1">
-                    <input className="cell-input w-full text-xs text-right" value={line.qty} onChange={(e) => updateLine(line.id, "qty", e.target.value)} placeholder="0" type="number" step="any" />
+                    <input className="cell-input w-full text-xs text-right" value={line.qty} onChange={(e) => updateLine(line.id, "qty", e.target.value)} placeholder="0" inputMode="decimal" />
                   </td>
                   <td className="px-1.5 py-1">
-                    <input className="cell-input w-full text-xs text-right" value={line.unitPrice} onChange={(e) => updateLine(line.id, "unitPrice", e.target.value)} placeholder="0.00" type="number" step="any" />
+                    <input className="cell-input w-full text-xs text-right" value={line.unitPrice} onChange={(e) => updateLine(line.id, "unitPrice", e.target.value)} placeholder="0.00" inputMode="decimal" />
                   </td>
                   <td className="px-1 py-0.5 text-right">
                     <span className="text-secondary font-bold text-xs">${fmt(calcSub(line))}</span>
