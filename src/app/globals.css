@@ -129,6 +129,9 @@ body {
   font-size: 12px;
   outline: none;
 }
+.cell-input[type="date"] {
+  color-scheme: dark;
+}
 .cell-input:focus {
   border-color: rgba(123,47,190,0.4);
 }

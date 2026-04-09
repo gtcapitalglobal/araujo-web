@@ -444,7 +444,7 @@ export default function InvoicePage() {
               {lines.map((line, i) => (
                 <tr key={line.id} className="border-b border-primary/10 hover:bg-surface/40 transition">
                   <td className="px-1 py-0.5">
-                    <input className="cell-input w-full text-xs" value={line.date} onChange={(e) => updateLine(line.id, "date", e.target.value)} placeholder="3/19/26" />
+                    <input type="date" className="cell-input w-full text-xs" value={line.date} onChange={(e) => updateLine(line.id, "date", e.target.value)} />
                   </td>
                   <td className="px-1 py-0.5">
                     <input className="cell-input w-full text-xs" value={line.poAuth} onChange={(e) => updateLine(line.id, "poAuth", e.target.value)} placeholder="" />
@@ -527,7 +527,7 @@ export default function InvoicePage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
-                  <CardField label="Date" value={line.date} onChange={(v) => updateLine(line.id, "date", v)} placeholder="3/19/26" />
+                  <CardField label="Date" value={line.date} onChange={(v) => updateLine(line.id, "date", v)} type="date" />
                   <CardField label="PO/Auth #" value={line.poAuth} onChange={(v) => updateLine(line.id, "poAuth", v)} placeholder="" />
                   <CardField label="Name" value={line.name} onChange={(v) => updateLine(line.id, "name", v)} placeholder="" />
                   <CardField label="Description" value={line.description} onChange={(v) => handleDescChange(line.id, v)} placeholder="codigo USIG" />
