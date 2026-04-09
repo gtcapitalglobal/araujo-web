@@ -50,8 +50,8 @@ export default function InvoicePage() {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [weekOf, setWeekOf] = useState("");
   const [billTo, setBillTo] = useState("Atlanta");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("404 466-0988");
+  const [email, setEmail] = useState("araujocompanyllc@gmail.com");
 
   // Lines
   const [lines, setLines] = useState<InvoiceLine[]>([emptyLine(), emptyLine(), emptyLine()]);
@@ -128,8 +128,8 @@ export default function InvoicePage() {
     setInvoiceNumber("");
     setWeekOf("");
     setBillTo("Atlanta");
-    setPhone("");
-    setEmail("");
+    setPhone("404 466-0988");
+    setEmail("araujocompanyllc@gmail.com");
     setLines([emptyLine(), emptyLine(), emptyLine()]);
     setMode("edit");
   };
