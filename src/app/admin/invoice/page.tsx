@@ -434,7 +434,7 @@ export default function InvoicePage() {
                 <th className="text-text-muted font-bold text-[11px] text-left px-2 py-2.5 w-[120px]">PO/Auth#</th>
                 <th className="text-text-muted font-bold text-[11px] text-left px-2 py-2.5 w-[160px]">Name</th>
                 <th className="text-text-muted font-bold text-[11px] text-left px-2 py-2.5">Description</th>
-                <th className="text-text-muted font-bold text-[10px] text-right px-2 py-1.5 w-[60px]">QTY</th>
+                <th className="text-text-muted font-bold text-[10px] text-right px-2 py-1.5 w-[90px]">QTY</th>
                 <th className="text-text-muted font-bold text-[10px] text-right px-2 py-1.5 w-[75px]">Unit Price</th>
                 <th className="text-text-muted font-bold text-[10px] text-right px-2 py-1.5 w-[80px]">SubTotal</th>
                 <th className="text-text-muted font-bold text-[10px] text-center px-1 py-1.5 w-[50px]"></th>
