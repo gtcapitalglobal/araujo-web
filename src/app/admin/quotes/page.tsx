@@ -61,7 +61,7 @@ export default function QuotesPage() {
 
   const newCount = quotes.filter((q) => q.status === "new").length;
 
-  if (loading) return <div className="text-center py-20 text-text-muted">Carregando...</div>;
+  if (loading) return <div className="space-y-4 py-4">{[...Array(4)].map((_, i) => <div key={i} className="skeleton h-16 rounded-2xl" />)}</div>;
 
   return (
     <div>

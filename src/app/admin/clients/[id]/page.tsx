@@ -110,7 +110,7 @@ export default function ClientDetailPage() {
     : null;
 
   if (loading) {
-    return <div className="text-center py-20 text-text-muted">Carregando...</div>;
+    return <div className="space-y-4 py-4">{[...Array(4)].map((_, i) => <div key={i} className="skeleton h-16 rounded-2xl" />)}</div>;
   }
 
   if (!client) {

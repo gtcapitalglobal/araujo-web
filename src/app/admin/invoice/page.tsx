@@ -347,7 +347,7 @@ export default function InvoicePage() {
         )}
 
         {loading ? (
-          <p className="text-text-muted text-center py-12">Carregando...</p>
+          <div className="space-y-4 py-4">{[...Array(4)].map((_, i) => <div key={i} className="skeleton h-16 rounded-2xl" />)}</div>
         ) : savedInvoices.length === 0 ? (
           <div className="glass rounded-2xl p-12 text-center">
             <FileText className="mx-auto mb-3 text-text-muted" size={48} />
@@ -532,7 +532,7 @@ export default function InvoicePage() {
                 const codeMatch = line.description.match(/^(\d{4})/);
                 const unitLabel = codeMatch ? lookupByCode(codeMatch[1])?.unit : undefined;
                 return (
-                <tr key={line.id} className={`border-b border-primary/10 transition ${hasSub ? "bg-primary/5" : "hover:bg-surface/40"}`}>
+                <tr key={line.id} className={`border-b border-border/30 transition ${hasSub ? "bg-primary/5" : "zebra-row"}`}>
                   <td className="px-1.5 py-1">
                     <input type="date" className="cell-input w-full text-xs" value={line.date} onChange={(e) => updateLine(line.id, "date", e.target.value)} />
                   </td>
@@ -573,9 +573,9 @@ export default function InvoicePage() {
                 );
               })}
               {/* Add line row */}
-              <tr className="border-b border-primary/10">
+              <tr className="border-b border-border/30">
                 <td colSpan={8} className="px-2 py-1">
-                  <button onClick={() => setLines((p) => [...p, emptyLine()])} className="flex items-center gap-1 text-accent text-[11px] font-bold hover:text-accent/80 transition">
+                  <button onClick={() => setLines((p) => [...p, emptyLine()])} className="flex items-center gap-1 text-primary text-[11px] font-bold hover:text-primary/80 transition">
                     <Plus size={12} /> Adicionar linha
                   </button>
                 </td>

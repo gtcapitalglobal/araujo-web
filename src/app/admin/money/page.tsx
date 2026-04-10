@@ -92,25 +92,25 @@ export default function MoneyPage() {
 
   return (
     <div>
-      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent mb-8">DINHEIRO</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title mb-8">DINHEIRO</h1>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-money-in/10 border border-money-in/30 rounded-2xl p-5">
+        <div className="stat-card bg-money-in/10 border border-money-in/30 rounded-2xl p-5" style={{ "--stat-glow": "rgba(34,197,94,0.3)" } as React.CSSProperties}>
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp size={20} className="text-money-in" />
             <span className="text-text-muted text-xs font-medium">Receita - {monthNames[month - 1]}</span>
           </div>
           <p className="text-2xl font-black text-money-in">${monthIncome.toFixed(2)}</p>
         </div>
-        <div className="bg-money-out/10 border border-money-out/30 rounded-2xl p-5">
+        <div className="stat-card bg-money-out/10 border border-money-out/30 rounded-2xl p-5" style={{ "--stat-glow": "rgba(255,77,77,0.3)" } as React.CSSProperties}>
           <div className="flex items-center gap-2 mb-2">
             <TrendingDown size={20} className="text-money-out" />
             <span className="text-text-muted text-xs font-medium">Despesas - {monthNames[month - 1]}</span>
           </div>
           <p className="text-2xl font-black text-money-out">${monthExpenses.toFixed(2)}</p>
         </div>
-        <div className="bg-profit/10 border border-profit/30 rounded-2xl p-5">
+        <div className="stat-card bg-profit/10 border border-profit/30 rounded-2xl p-5" style={{ "--stat-glow": "rgba(255,214,0,0.3)" } as React.CSSProperties}>
           <div className="flex items-center gap-2 mb-2">
             <DollarSign size={20} className="text-profit" />
             <span className="text-text-muted text-xs font-medium">Lucro - {monthNames[month - 1]}</span>
@@ -131,16 +131,16 @@ export default function MoneyPage() {
 
       {/* Entries List */}
       {loading ? (
-        <div className="text-center py-20 text-text-muted">Carregando...</div>
+        <div className="space-y-3">{[...Array(5)].map((_, i) => <div key={i} className="skeleton h-16 rounded-2xl" />)}</div>
       ) : entries.length === 0 ? (
         <div className="text-center py-20">
           <DollarSign size={48} className="mx-auto text-text-muted mb-4" />
           <p className="text-text-muted">Nenhuma entrada ainda</p>
         </div>
       ) : (
-        <div className="bg-surface border border-border rounded-2xl divide-y divide-border">
-          {entries.map((e) => (
-            <div key={e.id} className="flex items-center justify-between p-4 hover:bg-card/50 transition-colors">
+        <div className="bg-surface border border-border rounded-2xl overflow-hidden">
+          {entries.map((e, idx) => (
+            <div key={e.id} className={`flex items-center justify-between p-4 border-b border-border/30 transition-colors ${idx % 2 === 0 ? "bg-transparent" : "bg-card/30"} hover:bg-primary/5`}>
               <div className="flex items-center gap-4">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${e.kind === "income" ? "bg-money-in/20" : "bg-money-out/20"}`}>
                   {e.kind === "income" ? <TrendingUp size={18} className="text-money-in" /> : <TrendingDown size={18} className="text-money-out" />}

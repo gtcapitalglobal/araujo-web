@@ -45,7 +45,7 @@ export default function KnowledgePage() {
 
   return (
     <div>
-      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent mb-8">KNOWLEDGE BASE</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title mb-8">KNOWLEDGE BASE</h1>
 
       {/* Search */}
       <div className="relative mb-4">
@@ -66,7 +66,7 @@ export default function KnowledgePage() {
 
       {/* Articles */}
       {loading ? (
-        <div className="text-center py-20 text-text-muted">Carregando...</div>
+        <div className="space-y-4 py-4">{[...Array(4)].map((_, i) => <div key={i} className="skeleton h-16 rounded-2xl" />)}</div>
       ) : Object.keys(grouped).length === 0 ? (
         <div className="text-center py-20">
           <BookOpen size={48} className="mx-auto text-text-muted mb-4" />

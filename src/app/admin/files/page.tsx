@@ -71,7 +71,7 @@ export default function FilesPage() {
 
   return (
     <div>
-      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent mb-8">ARQUIVOS</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title mb-8">ARQUIVOS</h1>
 
       <div className="grid lg:grid-cols-[280px_1fr] gap-6">
         {/* Folder Sidebar */}
@@ -91,7 +91,7 @@ export default function FilesPage() {
             </button>
 
             {loading ? (
-              <div className="text-center py-4 text-text-muted text-xs">Carregando...</div>
+              <div className="skeleton h-8 rounded-xl" />
             ) : folders.length === 0 ? (
               <p className="text-xs text-text-muted text-center py-4">Nenhuma pasta</p>
             ) : (

@@ -130,7 +130,19 @@ export default function AdminDashboard() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  if (loading) return <div className="text-center py-20 text-text-muted">Carregando...</div>;
+  if (loading) return (
+    <div className="space-y-6 py-4">
+      <div className="skeleton h-10 w-72" />
+      <div className="skeleton h-4 w-48" />
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        {[...Array(6)].map((_, i) => <div key={i} className="skeleton h-24 rounded-2xl" />)}
+      </div>
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="skeleton h-48 rounded-2xl" />
+        <div className="skeleton h-48 rounded-2xl" />
+      </div>
+    </div>
+  );
   if (!data) return null;
 
   const statusColors: Record<string, string> = {
@@ -264,14 +276,14 @@ export default function AdminDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {[
-          { label: "Receita do Mes", value: `$${data.monthIncome.toFixed(2)}`, icon: DollarSign, color: "text-money-in", bg: "bg-money-in/10", border: "border-money-in/30" },
-          { label: "Despesas do Mes", value: `$${data.monthExpenses.toFixed(2)}`, icon: DollarSign, color: "text-money-out", bg: "bg-money-out/10", border: "border-money-out/30" },
-          { label: "Lucro do Mes", value: `$${data.monthProfit.toFixed(2)}`, icon: DollarSign, color: "text-profit", bg: "bg-profit/10", border: "border-profit/30" },
-          { label: "Jobs Ativos", value: data.jobCount.toString(), icon: Briefcase, color: "text-secondary", bg: "bg-secondary/10", border: "border-secondary/30" },
-          { label: "Clientes", value: data.clientCount.toString(), icon: Users, color: "text-primary-light", bg: "bg-primary/10", border: "border-primary/30" },
-          { label: "Milhas (Ano)", value: data.yearMiles.toFixed(0), icon: Car, color: "text-accent", bg: "bg-accent/10", border: "border-accent/30" },
+          { label: "Receita do Mes", value: `$${data.monthIncome.toFixed(2)}`, icon: DollarSign, color: "text-money-in", bg: "bg-money-in/10", border: "border-money-in/30", glow: "rgba(34,197,94,0.3)" },
+          { label: "Despesas do Mes", value: `$${data.monthExpenses.toFixed(2)}`, icon: DollarSign, color: "text-money-out", bg: "bg-money-out/10", border: "border-money-out/30", glow: "rgba(255,77,77,0.3)" },
+          { label: "Lucro do Mes", value: `$${data.monthProfit.toFixed(2)}`, icon: DollarSign, color: "text-profit", bg: "bg-profit/10", border: "border-profit/30", glow: "rgba(255,214,0,0.3)" },
+          { label: "Jobs Ativos", value: data.jobCount.toString(), icon: Briefcase, color: "text-secondary", bg: "bg-secondary/10", border: "border-secondary/30", glow: "rgba(162,89,255,0.3)" },
+          { label: "Clientes", value: data.clientCount.toString(), icon: Users, color: "text-primary-light", bg: "bg-primary/10", border: "border-primary/30", glow: "rgba(0,153,255,0.3)" },
+          { label: "Milhas (Ano)", value: data.yearMiles.toFixed(0), icon: Car, color: "text-accent", bg: "bg-accent/10", border: "border-accent/30", glow: "rgba(255,214,0,0.3)" },
         ].map((c) => (
-          <div key={c.label} className={`${c.bg} border ${c.border} rounded-2xl p-5`}>
+          <div key={c.label} className={`stat-card ${c.bg} border ${c.border} rounded-2xl p-5`} style={{ "--stat-glow": c.glow } as React.CSSProperties}>
             <div className="flex items-center gap-3 mb-2">
               <c.icon size={18} className={c.color} />
               <span className="text-text-muted text-xs font-medium">{c.label}</span>
@@ -283,9 +295,9 @@ export default function AdminDashboard() {
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         {/* Today's Jobs */}
-        <div className="bg-surface border border-border rounded-2xl p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6 card-glow">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider">JOBS DE HOJE</h2>
+            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider">JOBS DE HOJE</h2>
             <Link href="/admin/jobs" className="text-text-muted text-xs hover:text-secondary transition">Ver todos →</Link>
           </div>
           {data.todayJobs.length > 0 ? (
@@ -306,9 +318,9 @@ export default function AdminDashboard() {
         </div>
 
         {/* Upcoming Reminders */}
-        <div className="bg-surface border border-border rounded-2xl p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6 card-glow">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider">LEMBRETES</h2>
+            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider">LEMBRETES</h2>
             <Link href="/admin/reminders" className="text-text-muted text-xs hover:text-secondary transition">Ver todos →</Link>
           </div>
           {data.upcomingReminders.length > 0 ? (
@@ -389,9 +401,9 @@ export default function AdminDashboard() {
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         {/* Recent Quotes */}
-        <div className="bg-surface border border-border rounded-2xl p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6 card-glow">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider">ORCAMENTOS RECENTES</h2>
+            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider">ORCAMENTOS RECENTES</h2>
             <Link href="/admin/quotes" className="text-text-muted text-xs hover:text-secondary transition">Ver todos →</Link>
           </div>
           {data.recentQuotes.length > 0 ? (
@@ -412,9 +424,9 @@ export default function AdminDashboard() {
         </div>
 
         {/* Recent Money */}
-        <div className="bg-surface border border-border rounded-2xl p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6 card-glow">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider">TRANSACOES RECENTES</h2>
+            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider">TRANSACOES RECENTES</h2>
             <Link href="/admin/money" className="text-text-muted text-xs hover:text-secondary transition">Ver todos →</Link>
           </div>
           {data.recentMoney.length > 0 ? (
@@ -439,9 +451,9 @@ export default function AdminDashboard() {
 
       {/* Pinned Notes */}
       {data.pinnedNotes.length > 0 && (
-        <div className="bg-surface border border-border rounded-2xl p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6 card-glow">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider">NOTAS FIXADAS</h2>
+            <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider">NOTAS FIXADAS</h2>
             <Link href="/admin/notes" className="text-text-muted text-xs hover:text-secondary transition">Ver todas →</Link>
           </div>
           <div className="grid sm:grid-cols-3 gap-3">

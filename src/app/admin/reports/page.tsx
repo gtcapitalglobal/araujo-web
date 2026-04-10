@@ -230,7 +230,7 @@ export default function ReportsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-text-muted">Carregando...</div>
+        <div className="space-y-4 py-4">{[...Array(4)].map((_, i) => <div key={i} className="skeleton h-16 rounded-2xl" />)}</div>
       ) : (
         <>
           {/* Summary Cards */}
