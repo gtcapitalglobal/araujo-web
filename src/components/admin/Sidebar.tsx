@@ -90,12 +90,12 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static top-0 left-0 z-40 h-screen w-[260px] bg-surface/95 backdrop-blur-xl border-r border-primary/10 flex flex-col transition-transform lg:translate-x-0 ${
+        className={`fixed lg:static top-0 left-0 z-40 h-screen w-[260px] bg-surface/95 backdrop-blur-xl border-r border-border/50 flex flex-col transition-transform lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand */}
-        <div className="p-5 border-b border-primary/10">
+        <div className="p-5 border-b border-border/50">
           <Link href="/admin" className="flex items-center gap-3" onClick={() => setOpen(false)}>
             <div className="relative">
               <Image src="/logo.png" alt="Logo" width={42} height={42} className="rounded-xl" />
@@ -125,14 +125,14 @@ export default function Sidebar() {
                     onClick={() => setOpen(false)}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all relative ${
                       isActive(href)
-                        ? "bg-gradient-to-r from-primary/20 to-secondary/10 text-accent shadow-[0_0_15px_rgba(123,47,190,0.15)]"
+                        ? "bg-gradient-to-r from-primary/15 to-secondary/10 text-primary shadow-[0_0_15px_rgba(0,212,255,0.1)]"
                         : "text-text-secondary hover:bg-card/60 hover:text-text"
                     }`}
                   >
                     {isActive(href) && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-gradient-to-b from-accent to-primary rounded-r-full" />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-gradient-to-b from-primary to-secondary rounded-r-full" />
                     )}
-                    <Icon size={17} className={isActive(href) ? "text-accent" : ""} />
+                    <Icon size={17} className={isActive(href) ? "text-primary" : ""} />
                     {label}
                   </Link>
                 ))}
@@ -142,7 +142,7 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="p-3 border-t border-primary/10">
+        <div className="p-3 border-t border-border/50">
           <Link
             href="/"
             target="_blank"

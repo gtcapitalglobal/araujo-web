@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0A0A1B;
-  --color-surface: #12122A;
-  --color-card: #1A1A3E;
-  --color-card-hover: #222250;
-  --color-border: #2A2A55;
-  --color-primary: #7B2FBE;
-  --color-primary-light: #9B4FDE;
-  --color-secondary: #00D4FF;
-  --color-accent: #FFD700;
-  --color-epic: #B94FFF;
+  --color-bg: #0B0F1A;
+  --color-surface: #111827;
+  --color-card: #1A2238;
+  --color-card-hover: #243050;
+  --color-border: #2D3748;
+  --color-primary: #00D4FF;
+  --color-primary-light: #0099FF;
+  --color-secondary: #A259FF;
+  --color-accent: #FFD600;
+  --color-epic: #A259FF;
   --color-legendary: #FF8C00;
-  --color-success: #00E676;
-  --color-warning: #FFAB00;
-  --color-error: #FF5252;
+  --color-success: #22C55E;
+  --color-warning: #FFD600;
+  --color-error: #FF4D4D;
   --color-text: #FFFFFF;
-  --color-text-secondary: #B0B0D0;
-  --color-text-muted: #6B6B8D;
-  --color-money-in: #00E676;
-  --color-money-out: #FF5252;
-  --color-profit: #FFD700;
+  --color-text-secondary: #A0AEC0;
+  --color-text-muted: #4A5568;
+  --color-money-in: #22C55E;
+  --color-money-out: #FF4D4D;
+  --color-profit: #FFD600;
 
   --font-display: "Orbitron", sans-serif;
   --font-body: "Inter", sans-serif;
@@ -32,44 +32,44 @@ body {
   font-family: var(--font-body);
 }
 
-/* Fortnite grid background */
+/* Grid background */
 .fort-grid {
   background-image:
-    linear-gradient(rgba(123,47,190,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(123,47,190,0.06) 1px, transparent 1px);
-  background-size: 50px 50px;
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
 }
 
 /* Glow effects */
-.glow-purple { box-shadow: 0 0 30px rgba(123,47,190,0.3), 0 0 60px rgba(123,47,190,0.1); }
-.glow-cyan { box-shadow: 0 0 30px rgba(0,212,255,0.3), 0 0 60px rgba(0,212,255,0.1); }
-.glow-gold { box-shadow: 0 0 30px rgba(255,215,0,0.3), 0 0 60px rgba(255,215,0,0.1); }
+.glow-purple { box-shadow: 0 0 25px rgba(162,89,255,0.25), 0 0 50px rgba(162,89,255,0.08); }
+.glow-cyan { box-shadow: 0 0 25px rgba(0,212,255,0.3), 0 0 50px rgba(0,212,255,0.1); }
+.glow-gold { box-shadow: 0 0 25px rgba(255,214,0,0.3), 0 0 50px rgba(255,214,0,0.1); }
 
 /* Card glow on hover */
 .card-glow {
   transition: all 0.3s ease;
 }
 .card-glow:hover {
-  box-shadow: 0 0 20px rgba(123,47,190,0.15), 0 4px 20px rgba(0,0,0,0.3);
-  border-color: rgba(123,47,190,0.3);
+  box-shadow: 0 0 20px rgba(0,212,255,0.12), 0 4px 24px rgba(0,0,0,0.4);
+  border-color: rgba(0,212,255,0.25);
   transform: translateY(-2px);
 }
 
 /* Gradient text */
 .gradient-text-gold {
-  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  background: linear-gradient(135deg, #FFD600, #FF8C00);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .gradient-text-primary {
-  background: linear-gradient(135deg, #7B2FBE, #00D4FF);
+  background: linear-gradient(135deg, #00D4FF, #A259FF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .gradient-text-epic {
-  background: linear-gradient(135deg, #B94FFF, #FF8C00);
+  background: linear-gradient(135deg, #A259FF, #00D4FF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -86,7 +86,7 @@ body {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(123,47,190,0.5), rgba(0,212,255,0.3));
+  background: linear-gradient(135deg, rgba(0,212,255,0.4), rgba(162,89,255,0.3));
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   pointer-events: none;
@@ -94,8 +94,8 @@ body {
 
 /* Animated pulse glow */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 15px rgba(123,47,190,0.2); }
-  50% { box-shadow: 0 0 30px rgba(123,47,190,0.4), 0 0 60px rgba(0,212,255,0.15); }
+  0%, 100% { box-shadow: 0 0 15px rgba(0,212,255,0.15); }
+  50% { box-shadow: 0 0 30px rgba(0,212,255,0.3), 0 0 60px rgba(162,89,255,0.12); }
 }
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
@@ -107,23 +107,23 @@ body {
   100% { background-position: 200% 0; }
 }
 .shimmer {
-  background: linear-gradient(90deg, transparent 25%, rgba(123,47,190,0.08) 50%, transparent 75%);
+  background: linear-gradient(90deg, transparent 25%, rgba(0,212,255,0.06) 50%, transparent 75%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
 
 /* Glass effect */
 .glass {
-  background: rgba(18,18,42,0.8);
+  background: rgba(17,24,39,0.85);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(123,47,190,0.15);
+  border: 1px solid rgba(0,212,255,0.12);
 }
 
 /* Invoice cell inputs */
 .cell-input {
-  background: rgba(10,10,27,0.5);
-  border: 1px solid rgba(123,47,190,0.1);
-  border-radius: 4px;
+  background: rgba(11,15,26,0.6);
+  border: 1px solid rgba(45,55,72,0.5);
+  border-radius: 6px;
   padding: 8px 8px;
   color: #fff;
   font-size: 13px;
@@ -133,20 +133,29 @@ body {
   color-scheme: dark;
 }
 .cell-input:focus {
-  border-color: rgba(123,47,190,0.4);
+  border-color: rgba(0,212,255,0.4);
+  box-shadow: 0 0 0 2px rgba(0,212,255,0.1);
 }
 .cell-input::placeholder {
-  color: rgba(107,107,141,0.5);
+  color: rgba(74,85,104,0.6);
 }
 
 /* Button styles */
 .btn-primary {
-  background: linear-gradient(135deg, #7B2FBE, #00D4FF);
+  background: linear-gradient(135deg, #00D4FF, #0099FF);
   color: #fff;
+  box-shadow: 0 0 20px rgba(0,212,255,0.2);
+}
+.btn-primary:hover {
+  box-shadow: 0 0 30px rgba(0,212,255,0.35), 0 0 60px rgba(0,153,255,0.15);
 }
 .btn-gold {
-  background: linear-gradient(135deg, #FFD700, #FF8C00);
-  color: #0A0A1B;
+  background: linear-gradient(135deg, #FFD600, #FF8C00);
+  color: #0B0F1A;
+  box-shadow: 0 0 20px rgba(255,214,0,0.15);
+}
+.btn-gold:hover {
+  box-shadow: 0 0 30px rgba(255,214,0,0.3);
 }
 
 /* Hide number input spinners */
@@ -162,8 +171,8 @@ input[type="number"] {
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(123,47,190,0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(123,47,190,0.6); }
+::-webkit-scrollbar-thumb { background: rgba(45,55,72,0.6); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,212,255,0.4); }
 
 /* Smooth transitions for all interactive elements */
 button, a, input, select, textarea {
@@ -172,5 +181,5 @@ button, a, input, select, textarea {
 
 /* Focus ring */
 input:focus, select:focus, textarea:focus {
-  box-shadow: 0 0 0 2px rgba(123,47,190,0.2), 0 0 15px rgba(123,47,190,0.1);
+  box-shadow: 0 0 0 2px rgba(0,212,255,0.15), 0 0 15px rgba(0,212,255,0.08);
 }
