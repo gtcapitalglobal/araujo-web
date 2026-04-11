@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { MoneyEntry } from "@/lib/types";
 import { DollarSign, TrendingUp, TrendingDown, Plus, Trash2, X, RefreshCw } from "lucide-react";
@@ -10,7 +11,17 @@ const incomeCategories = ["Service", "Material Reimbursement", "Referral", "Othe
 const expenseCategories = ["Materials", "Equipment", "Gas", "Insurance", "Tools", "Supplies", "Marketing", "Software", "Helper Payment", "Other Expense"];
 
 export default function MoneyPage() {
+  return (
+    <Suspense fallback={<div className="skeleton h-10 w-48" />}>
+      <MoneyPageContent />
+    </Suspense>
+  );
+}
+
+function MoneyPageContent() {
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [entries, setEntries] = useState<MoneyEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -36,6 +47,18 @@ export default function MoneyPage() {
   }, [supabase]);
 
   useEffect(() => { fetchEntries(); }, [fetchEntries]);
+
+  // Auto-open modal from query param (e.g. /admin/money?new=income)
+  useEffect(() => {
+    const newParam = searchParams.get("new");
+    if (newParam === "income" || newParam === "expense") {
+      setModalKind(newParam);
+      setForm({ category: "", subcategory: "", amount: "", date: new Date().toISOString().slice(0, 10), notes: "", isRecurring: false, frequency: "mensal" });
+      setShowModal(true);
+      // Clean the URL so refresh doesn't reopen
+      router.replace("/admin/money");
+    }
+  }, [searchParams, router]);
 
   const monthEntries = entries.filter((e) => e.date >= monthStart && e.date < nextMonth);
   const monthIncome = monthEntries.filter((e) => e.kind === "income").reduce((s, e) => s + e.amount, 0);

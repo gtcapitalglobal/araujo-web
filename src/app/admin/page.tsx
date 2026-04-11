@@ -5,14 +5,20 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import {
   DollarSign, Briefcase, Users, Car, MessageSquare, Bell,
-  Plus, ArrowRight, Clock, CheckCircle, AlertTriangle, StickyNote
+  ArrowRight, Clock, CheckCircle, AlertTriangle, StickyNote, Building2,
+  TrendingUp, TrendingDown, MessageCircle
 } from "lucide-react";
 import { getNextDueDate } from "@/lib/recurring";
 
+type Period = "month" | "lastMonth" | "year";
+
 interface DashboardData {
-  monthIncome: number;
-  monthExpenses: number;
-  monthProfit: number;
+  periodIncome: number;
+  periodExpenses: number;
+  periodProfit: number;
+  prevIncome: number;
+  prevExpenses: number;
+  prevProfit: number;
   jobCount: number;
   clientCount: number;
   yearMiles: number;
@@ -26,6 +32,52 @@ interface DashboardData {
   upcomingExpenses: { id: string; category: string; description: string | null; amount: number; next_due: string; frequency: string; source: "recurring" | "money" }[];
 }
 
+// Calculate the start/end of a given period and the comparable previous period
+function getPeriodRange(period: Period): { start: string; end: string; prevStart: string; prevEnd: string; label: string } {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+
+  if (period === "month") {
+    const start = new Date(y, m, 1);
+    const end = new Date(y, m + 1, 1);
+    const prevStart = new Date(y, m - 1, 1);
+    const prevEnd = new Date(y, m, 1);
+    return {
+      start: start.toISOString().split("T")[0],
+      end: end.toISOString().split("T")[0],
+      prevStart: prevStart.toISOString().split("T")[0],
+      prevEnd: prevEnd.toISOString().split("T")[0],
+      label: "Este Mes",
+    };
+  }
+  if (period === "lastMonth") {
+    const start = new Date(y, m - 1, 1);
+    const end = new Date(y, m, 1);
+    const prevStart = new Date(y, m - 2, 1);
+    const prevEnd = new Date(y, m - 1, 1);
+    return {
+      start: start.toISOString().split("T")[0],
+      end: end.toISOString().split("T")[0],
+      prevStart: prevStart.toISOString().split("T")[0],
+      prevEnd: prevEnd.toISOString().split("T")[0],
+      label: "Mes Passado",
+    };
+  }
+  // year
+  const start = new Date(y, 0, 1);
+  const end = new Date(y + 1, 0, 1);
+  const prevStart = new Date(y - 1, 0, 1);
+  const prevEnd = new Date(y, 0, 1);
+  return {
+    start: start.toISOString().split("T")[0],
+    end: end.toISOString().split("T")[0],
+    prevStart: prevStart.toISOString().split("T")[0],
+    prevEnd: prevEnd.toISOString().split("T")[0],
+    label: "Este Ano",
+  };
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface CompanyData { legal_name?: string; phone?: string; email?: string; address_line1?: string; website?: string; naics_code?: string; sic_code?: string; tax_classification?: string; license_number?: string; license_expiration?: string; license_city?: string; ein?: string; duns_number?: string; bank_name?: string; account_number?: string; routing_ach?: string; routing_wire?: string; zelle?: string; }
 
@@ -36,6 +88,7 @@ export default function AdminDashboard() {
   const [greeting, setGreeting] = useState("");
   const [paidId, setPaidId] = useState<string | null>(null);
   const [company, setCompany] = useState<CompanyData>({});
+  const [period, setPeriod] = useState<Period>("month");
 
   const handlePayExpense = async (exp: DashboardData["upcomingExpenses"][0]) => {
     if (exp.source === "recurring") {
@@ -70,20 +123,22 @@ export default function AdminDashboard() {
   const fetchData = useCallback(async () => {
     const now = new Date();
     const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    const monthStart = `${year}-${String(month).padStart(2, "0")}-01`;
-    const nextMonth = month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, "0")}-01`;
     const today = now.toISOString().split("T")[0];
+    const range = getPeriodRange(period);
 
     const [
-      clientsRes, jobsRes, incomeRes, expensesRes, mileageRes,
-      quotesCountRes, remindersCountRes, todayJobsRes, recentQuotesRes,
+      clientsRes, jobsRes,
+      incomeRes, expensesRes,
+      prevIncomeRes, prevExpensesRes,
+      mileageRes, quotesCountRes, remindersCountRes, todayJobsRes, recentQuotesRes,
       upcomingRemindersRes, recentMoneyRes, pinnedNotesRes, upcomingExpensesRes, upcomingMoneyRes
     ] = await Promise.all([
       supabase.from("clients").select("id", { count: "exact", head: true }),
       supabase.from("jobs").select("id", { count: "exact", head: true }).neq("status", "cancelled"),
-      supabase.from("money_entries").select("amount").eq("kind", "income").gte("date", monthStart).lt("date", nextMonth),
-      supabase.from("money_entries").select("amount").eq("kind", "expense").gte("date", monthStart).lt("date", nextMonth),
+      supabase.from("money_entries").select("amount").eq("kind", "income").gte("date", range.start).lt("date", range.end),
+      supabase.from("money_entries").select("amount").eq("kind", "expense").gte("date", range.start).lt("date", range.end),
+      supabase.from("money_entries").select("amount").eq("kind", "income").gte("date", range.prevStart).lt("date", range.prevEnd),
+      supabase.from("money_entries").select("amount").eq("kind", "expense").gte("date", range.prevStart).lt("date", range.prevEnd),
       supabase.from("mileage_logs").select("miles").gte("date", `${year}-01-01`),
       supabase.from("quote_requests").select("id", { count: "exact", head: true }).eq("status", "new"),
       supabase.from("reminders").select("id", { count: "exact", head: true }).eq("is_done", false).lte("due_date", now.toISOString()),
@@ -98,12 +153,17 @@ export default function AdminDashboard() {
 
     const totalIncome = incomeRes.data?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
     const totalExpenses = expensesRes.data?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
+    const prevIncome = prevIncomeRes.data?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
+    const prevExpenses = prevExpensesRes.data?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
     const totalMiles = mileageRes.data?.reduce((s, e) => s + (e.miles || 0), 0) || 0;
 
     setData({
-      monthIncome: totalIncome,
-      monthExpenses: totalExpenses,
-      monthProfit: totalIncome - totalExpenses,
+      periodIncome: totalIncome,
+      periodExpenses: totalExpenses,
+      periodProfit: totalIncome - totalExpenses,
+      prevIncome,
+      prevExpenses,
+      prevProfit: prevIncome - prevExpenses,
       jobCount: jobsRes.count || 0,
       clientCount: clientsRes.count || 0,
       yearMiles: totalMiles,
@@ -126,9 +186,56 @@ export default function AdminDashboard() {
     if (companyRes.data) setCompany(companyRes.data);
 
     setLoading(false);
-  }, [supabase]);
+  }, [supabase, period]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Share button handlers
+  const sharePaymentWhatsApp = () => {
+    const msg = `*Araujo Company LLC*\nPayment info:\n👉 https://www.araujocompany.com/pay`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  const sharePaymentSMS = () => {
+    const msg = `Araujo Company LLC\nPayment info:\nhttps://www.araujocompany.com/pay`;
+    window.open(`sms:?body=${encodeURIComponent(msg)}`, "_self");
+  };
+
+  const shareCompanyWhatsApp = () => {
+    const c = company;
+    const lines = [
+      `*${c.legal_name || "Araujo Company LLC"}*`,
+      c.phone ? `📱 ${c.phone}` : "",
+      c.email ? `📧 ${c.email}` : "",
+      c.address_line1 ? `📍 ${c.address_line1}` : "",
+      c.website ? `🕐 ${c.website}` : "",
+      "",
+      c.naics_code ? `📋 NAICS: ${c.naics_code}` : "",
+      c.sic_code ? `📋 SIC: ${c.sic_code}` : "",
+      c.tax_classification ? `🏛️ ${c.tax_classification}` : "",
+      c.license_number ? `📄 License #${c.license_number} — ${c.license_city || ""}${c.license_expiration ? ` (Exp: ${c.license_expiration})` : ""}` : "",
+      c.ein ? `🔢 EIN: ${c.ein}` : "",
+      c.duns_number ? `🔢 DUNS: ${c.duns_number}` : "",
+      "",
+      "🌐 araujocompany.com",
+    ].filter(Boolean).join("\n");
+    window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
+  };
+
+  const shareCompanySMS = () => {
+    const c = company;
+    const lines = [
+      c.legal_name || "Araujo Company LLC",
+      c.phone ? `Phone: ${c.phone}` : "",
+      c.email ? `Email: ${c.email}` : "",
+      c.address_line1 || "",
+      c.naics_code ? `NAICS: ${c.naics_code}` : "",
+      c.license_number ? `License #${c.license_number}` : "",
+      c.ein ? `EIN: ${c.ein}` : "",
+      "araujocompany.com",
+    ].filter(Boolean).join("\n");
+    window.open(`sms:?body=${encodeURIComponent(lines)}`, "_self");
+  };
 
   if (loading) return (
     <div className="space-y-6 py-4">
@@ -155,17 +262,29 @@ export default function AdminDashboard() {
   const quickActions = [
     { label: "Novo Cliente", href: "/admin/clients", icon: Users, color: "from-primary to-secondary" },
     { label: "Novo Job", href: "/admin/jobs", icon: Briefcase, color: "from-secondary to-primary" },
-    { label: "Registrar Receita", href: "/admin/money", icon: DollarSign, color: "from-success to-success" },
-    { label: "Registrar Despesa", href: "/admin/money", icon: DollarSign, color: "from-error to-error" },
+    { label: "Registrar Receita", href: "/admin/money?new=income", icon: DollarSign, color: "from-success to-success" },
+    { label: "Registrar Despesa", href: "/admin/money?new=expense", icon: DollarSign, color: "from-error to-error" },
     { label: "Registrar Milhas", href: "/admin/mileage", icon: Car, color: "from-accent to-legendary" },
     { label: "Nova Nota", href: "/admin/notes", icon: StickyNote, color: "from-epic to-primary" },
   ];
+
+  // Trend indicator helper
+  const getTrend = (current: number, prev: number, inverse = false) => {
+    if (prev === 0 && current === 0) return null;
+    if (prev === 0) return { pct: 100, positive: !inverse };
+    const pct = ((current - prev) / Math.abs(prev)) * 100;
+    const up = pct > 0;
+    // For expenses (inverse), going up is BAD
+    return { pct, positive: inverse ? !up : up };
+  };
+
+  const periodLabel = getPeriodRange(period).label;
 
   return (
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent">{greeting.toUpperCase()}, GUSTAVO!</h1>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black gradient-text-gold">{greeting.toUpperCase()}, GUSTAVO!</h1>
         <p className="text-text-muted text-sm mt-1">
           {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
         </p>
@@ -194,70 +313,32 @@ export default function AdminDashboard() {
       {/* Share Buttons */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <button
-          onClick={() => {
-            const msg = `*Araujo Company LLC*\nPayment info:\n👉 https://www.araujocompany.com/pay`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
-          }}
-          className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-3 px-4 rounded-2xl transition hover:scale-[1.01] active:scale-[0.99] text-sm"
+          onClick={sharePaymentWhatsApp}
+          className="flex items-center justify-center gap-2 bg-success/15 border border-success/40 text-success hover:bg-success/25 font-bold py-3 px-4 rounded-2xl transition hover:scale-[1.01] active:scale-[0.99] text-sm"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          💰 Payment
+          <DollarSign size={16} />
+          Payment WhatsApp
         </button>
         <button
-          onClick={() => {
-            const msg = `Araujo Company LLC\nPayment info:\nhttps://www.araujocompany.com/pay`;
-            window.open(`sms:?body=${encodeURIComponent(msg)}`, "_self");
-          }}
-          className="flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-3 px-4 rounded-2xl transition hover:scale-[1.01] active:scale-[0.99] text-sm"
+          onClick={sharePaymentSMS}
+          className="flex items-center justify-center gap-2 bg-primary/15 border border-primary/40 text-primary hover:bg-primary/25 font-bold py-3 px-4 rounded-2xl transition hover:scale-[1.01] active:scale-[0.99] text-sm"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-          💰 SMS Pay
+          <MessageCircle size={16} />
+          Payment SMS
         </button>
         <button
-          onClick={() => {
-            const c = company;
-            const lines = [
-              `*${c.legal_name || "Araujo Company LLC"}*`,
-              c.phone ? `📱 ${c.phone}` : "",
-              c.email ? `📧 ${c.email}` : "",
-              c.address_line1 ? `📍 ${c.address_line1}` : "",
-              c.website ? `🕐 ${c.website}` : "",
-              "",
-              c.naics_code ? `📋 NAICS: ${c.naics_code}` : "",
-              c.sic_code ? `📋 SIC: ${c.sic_code}` : "",
-              c.tax_classification ? `🏛️ ${c.tax_classification}` : "",
-              c.license_number ? `📄 License #${c.license_number} — ${c.license_city || ""}${c.license_expiration ? ` (Exp: ${c.license_expiration})` : ""}` : "",
-              c.ein ? `🔢 EIN: ${c.ein}` : "",
-              c.duns_number ? `🔢 DUNS: ${c.duns_number}` : "",
-              "",
-              "🌐 araujocompany.com",
-            ].filter(Boolean).join("\n");
-            window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
-          }}
-          className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-3 px-4 rounded-2xl transition hover:scale-[1.01] active:scale-[0.99] text-sm"
+          onClick={shareCompanyWhatsApp}
+          className="flex items-center justify-center gap-2 bg-success/15 border border-success/40 text-success hover:bg-success/25 font-bold py-3 px-4 rounded-2xl transition hover:scale-[1.01] active:scale-[0.99] text-sm"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          🏢 Company
+          <Building2 size={16} />
+          Company WhatsApp
         </button>
         <button
-          onClick={() => {
-            const c = company;
-            const lines = [
-              c.legal_name || "Araujo Company LLC",
-              c.phone ? `Phone: ${c.phone}` : "",
-              c.email ? `Email: ${c.email}` : "",
-              c.address_line1 || "",
-              c.naics_code ? `NAICS: ${c.naics_code}` : "",
-              c.license_number ? `License #${c.license_number}` : "",
-              c.ein ? `EIN: ${c.ein}` : "",
-              "araujocompany.com",
-            ].filter(Boolean).join("\n");
-            window.open(`sms:?body=${encodeURIComponent(lines)}`, "_self");
-          }}
-          className="flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-3 px-4 rounded-2xl transition hover:scale-[1.01] active:scale-[0.99] text-sm"
+          onClick={shareCompanySMS}
+          className="flex items-center justify-center gap-2 bg-primary/15 border border-primary/40 text-primary hover:bg-primary/25 font-bold py-3 px-4 rounded-2xl transition hover:scale-[1.01] active:scale-[0.99] text-sm"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-          🏢 SMS Info
+          <MessageSquare size={16} />
+          Company SMS
         </button>
       </div>
 
@@ -273,23 +354,58 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      {/* Period Selector */}
+      <div className="flex items-center gap-2 mb-5">
+        <span className="text-text-muted text-xs font-semibold mr-1">Periodo:</span>
+        {([
+          { key: "month" as const, label: "Este Mes" },
+          { key: "lastMonth" as const, label: "Mes Passado" },
+          { key: "year" as const, label: "Este Ano" },
+        ]).map((opt) => (
+          <button
+            key={opt.key}
+            onClick={() => setPeriod(opt.key)}
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              period === opt.key
+                ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg"
+                : "bg-card border border-border text-text-muted hover:border-primary/40 hover:text-text"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {[
-          { label: "Receita do Mes", value: `$${data.monthIncome.toFixed(2)}`, icon: DollarSign, color: "text-money-in", bg: "bg-money-in/10", border: "border-money-in/30", glow: "rgba(34,197,94,0.3)" },
-          { label: "Despesas do Mes", value: `$${data.monthExpenses.toFixed(2)}`, icon: DollarSign, color: "text-money-out", bg: "bg-money-out/10", border: "border-money-out/30", glow: "rgba(255,77,77,0.3)" },
-          { label: "Lucro do Mes", value: `$${data.monthProfit.toFixed(2)}`, icon: DollarSign, color: "text-profit", bg: "bg-profit/10", border: "border-profit/30", glow: "rgba(255,214,0,0.3)" },
-          { label: "Jobs Ativos", value: data.jobCount.toString(), icon: Briefcase, color: "text-secondary", bg: "bg-secondary/10", border: "border-secondary/30", glow: "rgba(162,89,255,0.3)" },
-          { label: "Clientes", value: data.clientCount.toString(), icon: Users, color: "text-primary-light", bg: "bg-primary/10", border: "border-primary/30", glow: "rgba(0,153,255,0.3)" },
-          { label: "Milhas (Ano)", value: data.yearMiles.toFixed(0), icon: Car, color: "text-accent", bg: "bg-accent/10", border: "border-accent/30", glow: "rgba(255,214,0,0.3)" },
+          { label: `Receita - ${periodLabel}`, value: `$${data.periodIncome.toFixed(2)}`, icon: DollarSign, color: "text-money-in", bg: "bg-money-in/10", border: "border-money-in/30", glow: "rgba(34,197,94,0.3)", href: "/admin/money", trend: getTrend(data.periodIncome, data.prevIncome) },
+          { label: `Despesas - ${periodLabel}`, value: `$${data.periodExpenses.toFixed(2)}`, icon: DollarSign, color: "text-money-out", bg: "bg-money-out/10", border: "border-money-out/30", glow: "rgba(255,77,77,0.3)", href: "/admin/money", trend: getTrend(data.periodExpenses, data.prevExpenses, true) },
+          { label: `Lucro - ${periodLabel}`, value: `$${data.periodProfit.toFixed(2)}`, icon: DollarSign, color: "text-profit", bg: "bg-profit/10", border: "border-profit/30", glow: "rgba(255,214,0,0.3)", href: "/admin/money", trend: getTrend(data.periodProfit, data.prevProfit) },
+          { label: "Jobs Ativos", value: data.jobCount.toString(), icon: Briefcase, color: "text-secondary", bg: "bg-secondary/10", border: "border-secondary/30", glow: "rgba(162,89,255,0.3)", href: "/admin/jobs", trend: null },
+          { label: "Clientes", value: data.clientCount.toString(), icon: Users, color: "text-primary-light", bg: "bg-primary/10", border: "border-primary/30", glow: "rgba(0,153,255,0.3)", href: "/admin/clients", trend: null },
+          { label: "Milhas (Ano)", value: data.yearMiles.toFixed(0), icon: Car, color: "text-accent", bg: "bg-accent/10", border: "border-accent/30", glow: "rgba(255,214,0,0.3)", href: "/admin/mileage", trend: null },
         ].map((c) => (
-          <div key={c.label} className={`stat-card ${c.bg} border ${c.border} rounded-2xl p-5`} style={{ "--stat-glow": c.glow } as React.CSSProperties}>
-            <div className="flex items-center gap-3 mb-2">
-              <c.icon size={18} className={c.color} />
-              <span className="text-text-muted text-xs font-medium">{c.label}</span>
+          <Link
+            key={c.label}
+            href={c.href}
+            className={`stat-card ${c.bg} border ${c.border} rounded-2xl p-5 block cursor-pointer`}
+            style={{ "--stat-glow": c.glow } as React.CSSProperties}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <c.icon size={18} className={c.color} />
+                <span className="text-text-muted text-xs font-medium">{c.label}</span>
+              </div>
+              {c.trend && (
+                <span className={`flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${c.trend.positive ? "text-success bg-success/10" : "text-error bg-error/10"}`}>
+                  {c.trend.positive ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                  {Math.abs(c.trend.pct).toFixed(0)}%
+                </span>
+              )}
             </div>
             <p className={`text-2xl font-black ${c.color}`}>{c.value}</p>
-          </div>
+          </Link>
         ))}
       </div>
 
