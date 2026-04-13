@@ -62,7 +62,7 @@ export default function MileagePage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent">MILEAGE</h1>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title">MILEAGE</h1>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity">
           <Plus size={18} /> Nova Viagem
         </button>
@@ -75,7 +75,7 @@ export default function MileagePage() {
             <Car size={20} className="text-accent" />
             <span className="text-text-muted text-xs font-medium">Total Miles {year}</span>
           </div>
-          <p className="text-2xl font-black text-accent">{totalMiles.toFixed(1)} mi</p>
+          <p className="text-2xl font-black section-title">{totalMiles.toFixed(1)} mi</p>
         </div>
         <div className="bg-success/10 border border-success/30 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-2">

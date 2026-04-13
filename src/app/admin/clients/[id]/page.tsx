@@ -145,7 +145,7 @@ export default function ClientDetailPage() {
       <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
-            <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent mb-3">
+            <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title mb-3">
               {client.name}
             </h1>
             <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-text-secondary">

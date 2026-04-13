@@ -147,7 +147,7 @@ export default function RecurringPage() {
     <div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent">DESPESAS RECORRENTES</h1>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title">DESPESAS RECORRENTES</h1>
         <button onClick={openNew} className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity">
           <Plus size={18} /> Nova Despesa
         </button>
@@ -207,7 +207,7 @@ export default function RecurringPage() {
                     onClick={() => handleMarkPaid(e)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${paidId === e.id ? "bg-success/20 text-success" : "bg-accent/20 text-accent hover:bg-accent/30"}`}
                   >
-                    {paidId === e.id ? <span className="flex items-center gap-1"><CheckCircle size={14} /> Pago!</span> : "💰 Pagar"}
+                    {paidId === e.id ? <span className="flex items-center gap-1"><CheckCircle size={14} /> Pago!</span> : <span className="flex items-center gap-1"><DollarSign size={12} /> Pagar</span>}
                   </button>
                 )}
                 <button

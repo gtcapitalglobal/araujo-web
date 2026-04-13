@@ -104,7 +104,7 @@ export default function HelpersPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent">HELPERS</h1>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title">HELPERS</h1>
         <div className="flex gap-3">
           <button onClick={() => openPayment()} className="flex items-center gap-2 bg-gradient-to-r from-accent to-legendary text-bg font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity">
             <DollarSign size={18} /> Add Payment

@@ -133,7 +133,7 @@ export default function CompanyPage() {
 
       {/* REGISTRO */}
       <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
-        <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider mb-6">📋 REGISTRO</h2>
+        <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider mb-6">REGISTRO</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div><label className={labelClass}>Razao Social</label><input value={form.legal_name} onChange={(e) => update("legal_name", e.target.value)} className={inputClass} /></div>
           <div><label className={labelClass}>EIN (Tax ID)</label><input value={form.ein} onChange={(e) => update("ein", e.target.value)} className={inputClass} /></div>
@@ -153,7 +153,7 @@ export default function CompanyPage() {
 
       {/* ENDERECO & CONTATO */}
       <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
-        <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider mb-6">📍 ENDERECO & CONTATO</h2>
+        <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider mb-6">ENDERECO & CONTATO</h2>
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div><label className={labelClass}>Telefone</label><input value={form.phone} onChange={(e) => update("phone", e.target.value)} className={inputClass} /></div>
@@ -166,7 +166,7 @@ export default function CompanyPage() {
 
       {/* FINANCEIRO */}
       <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
-        <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider mb-6">🏦 FINANCEIRO</h2>
+        <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider mb-6">FINANCEIRO</h2>
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className={labelClass}>Banco</label><input value={form.bank_name} onChange={(e) => update("bank_name", e.target.value)} className={inputClass} /></div>
@@ -193,7 +193,7 @@ export default function CompanyPage() {
                       const msg = `*${form.legal_name || "Araujo Company LLC"}*\nPayment info:\n👉 https://www.araujocompany.com/pay`;
                       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
                     }}
-                    className="flex items-center gap-1 text-xs bg-[#25D366] text-white px-3 py-2 rounded-lg hover:bg-[#1da851] transition"
+                    className="flex items-center gap-1 text-xs bg-success/15 border border-success/40 text-success px-3 py-2 rounded-lg hover:bg-success/25 transition"
                   >
                     <Share2 size={12} /> Enviar QR via WhatsApp
                   </button>
@@ -223,7 +223,7 @@ export default function CompanyPage() {
               </div>
             ) : (
               <label className="mt-2 inline-flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-2.5 cursor-pointer hover:border-primary/50 transition">
-                <span className="text-text-muted text-sm">📷 Enviar QR Code</span>
+                <span className="text-text-muted text-sm">Enviar QR Code</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -247,7 +247,7 @@ export default function CompanyPage() {
 
       {/* SOCIOS & MEMBROS */}
       <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
-        <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider mb-6">🤝 SOCIOS & MEMBROS</h2>
+        <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider mb-6">SOCIOS & MEMBROS</h2>
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div><label className={labelClass}>Nome Completo</label><input value={form.member_name} onChange={(e) => update("member_name", e.target.value)} className={inputClass} /></div>
@@ -264,7 +264,7 @@ export default function CompanyPage() {
 
       {/* NOTAS */}
       <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
-        <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider mb-6">📝 NOTAS</h2>
+        <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider mb-6">NOTAS</h2>
         <textarea value={form.notes} onChange={(e) => update("notes", e.target.value)} rows={3} className={`${inputClass} resize-none`} />
       </div>
 
@@ -280,7 +280,7 @@ export default function CompanyPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
         {/* CARD 1: Dados da Empresa */}
         <div className="bg-surface border border-border rounded-2xl p-6">
-          <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider mb-3">📤 ENVIAR DADOS DA EMPRESA</h2>
+          <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider mb-3">ENVIAR DADOS DA EMPRESA</h2>
           <p className="text-text-muted text-xs mb-4">Envia nome, contato, endereco, licenca, NAICS, EIN e site via WhatsApp</p>
           <div className="bg-card rounded-xl p-4 mb-4 text-xs text-text-secondary space-y-1 font-mono">
             <p className="text-text font-bold">{form.legal_name || "Araujo Company LLC"}</p>
@@ -312,7 +312,7 @@ export default function CompanyPage() {
               ].filter(Boolean).join("\n");
               window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
             }}
-            className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold px-6 py-3 rounded-xl transition"
+            className="w-full flex items-center justify-center gap-2 bg-success/15 border border-success/40 text-success hover:bg-success/25 font-bold px-6 py-3 rounded-xl transition"
           >
             <Share2 size={18} /> Enviar via WhatsApp
           </button>
@@ -320,7 +320,7 @@ export default function CompanyPage() {
 
         {/* CARD 2: Pagamento */}
         <div className="bg-surface border border-border rounded-2xl p-6">
-          <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider mb-3">💰 ENVIAR PAGAMENTO</h2>
+          <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider mb-3">ENVIAR PAGAMENTO</h2>
           <p className="text-text-muted text-xs mb-4">Envia link de pagamento e dados bancarios via WhatsApp</p>
           <div className="bg-card rounded-xl p-4 mb-4 text-xs text-text-secondary space-y-1 font-mono">
             <p className="text-text font-bold">{form.legal_name || "Araujo Company LLC"}</p>
@@ -348,7 +348,7 @@ export default function CompanyPage() {
               ].filter(Boolean).join("\n");
               window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, "_blank");
             }}
-            className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold px-6 py-3 rounded-xl transition"
+            className="w-full flex items-center justify-center gap-2 bg-success/15 border border-success/40 text-success hover:bg-success/25 font-bold px-6 py-3 rounded-xl transition"
           >
             <Share2 size={18} /> Enviar via WhatsApp
           </button>
@@ -358,7 +358,7 @@ export default function CompanyPage() {
       {/* Company Contacts */}
       <div className="bg-surface border border-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-secondary tracking-wider">CONTATOS DA EMPRESA</h2>
+          <h2 className="font-[family-name:var(--font-display)] text-sm font-bold section-title tracking-wider">CONTATOS DA EMPRESA</h2>
           <button onClick={openNewContact} className="flex items-center gap-2 bg-gradient-to-r from-accent to-legendary text-bg font-bold px-4 py-2 rounded-xl text-sm hover:opacity-90 transition-opacity">
             <Plus size={16} /> Novo Contato
           </button>

@@ -397,15 +397,15 @@ const sections: Section[] = [
         </p>
         <div className="space-y-3">
           {[
-            { date: "15 de Janeiro", what: "Pagar imposto trimestral", detail: "Referente a outubro-dezembro do ano anterior", icon: "💰" },
-            { date: "31 de Janeiro", what: "Enviar 1099 para ajudantes", detail: "Para todos que receberam mais de $600 no ano", icon: "📄" },
-            { date: "1 de Abril", what: "Renovar empresa na Georgia", detail: "Custa $60. Faca pelo site georgia.gov", icon: "🏛️" },
-            { date: "15 de Abril", what: "Declarar imposto + pagar trimestral", detail: "Declaracao do ano anterior + pagamento de janeiro-marco", icon: "📋" },
-            { date: "15 de Junho", what: "Pagar imposto trimestral", detail: "Referente a abril-junho", icon: "💰" },
-            { date: "15 de Setembro", what: "Pagar imposto trimestral", detail: "Referente a julho-setembro", icon: "💰" },
+            { date: "15 de Janeiro", what: "Pagar imposto trimestral", detail: "Referente a outubro-dezembro do ano anterior", color: "text-accent" },
+            { date: "31 de Janeiro", what: "Enviar 1099 para ajudantes", detail: "Para todos que receberam mais de $600 no ano", color: "text-secondary" },
+            { date: "1 de Abril", what: "Renovar empresa na Georgia", detail: "Custa $60. Faca pelo site georgia.gov", color: "text-primary" },
+            { date: "15 de Abril", what: "Declarar imposto + pagar trimestral", detail: "Declaracao do ano anterior + pagamento de janeiro-marco", color: "text-warning" },
+            { date: "15 de Junho", what: "Pagar imposto trimestral", detail: "Referente a abril-junho", color: "text-accent" },
+            { date: "15 de Setembro", what: "Pagar imposto trimestral", detail: "Referente a julho-setembro", color: "text-accent" },
           ].map((item) => (
             <div key={item.date} className="bg-card rounded-xl p-4 border border-border flex items-start gap-4">
-              <span className="text-2xl">{item.icon}</span>
+              <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black bg-card border border-border ${item.color}`}>{item.date.split(" ")[0]}</span>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <p className="text-accent font-bold text-sm">{item.date}</p>
@@ -433,7 +433,7 @@ export default function TaxesPage() {
 
   return (
     <div>
-      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent mb-2">IMPOSTOS E CONTABILIDADE</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title mb-2">IMPOSTOS E CONTABILIDADE</h1>
       <p className="text-text-muted text-sm mb-8">
         Guia completo para entender seus impostos como dono de empresa de flooring na Georgia.
         Linguagem simples, sem complicacao.

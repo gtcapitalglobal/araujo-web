@@ -119,7 +119,7 @@ export default function JobsPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent">JOBS</h1>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title">JOBS</h1>
         <button onClick={openNew} className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity">
           <Plus size={18} /> Novo Job
         </button>

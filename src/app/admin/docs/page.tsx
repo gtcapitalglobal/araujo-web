@@ -115,7 +115,7 @@ export default function DocsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent">DOCUMENTOS E LINKS</h1>
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title">DOCUMENTOS E LINKS</h1>
           <p className="text-text-muted text-sm mt-1">Todos os documentos importantes da empresa em um so lugar. Clique para abrir.</p>
         </div>
         <button onClick={openNew} className="flex items-center gap-2 bg-gradient-to-r from-accent to-legendary text-bg font-bold px-4 py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity">

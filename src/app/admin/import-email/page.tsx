@@ -120,7 +120,7 @@ export default function ImportEmailPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent">IMPORTAR DO EMAIL</h1>
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title">IMPORTAR DO EMAIL</h1>
           <p className="text-text-muted text-sm mt-1">Busca Install Packages do email araujocompanyllc@gmail.com</p>
         </div>
         {connected && (

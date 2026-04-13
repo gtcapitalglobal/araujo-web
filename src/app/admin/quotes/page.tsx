@@ -67,7 +67,7 @@ export default function QuotesPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent">PEDIDOS DE ORCAMENTO</h1>
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title">PEDIDOS DE ORCAMENTO</h1>
           {newCount > 0 && (
             <span className="bg-secondary/20 text-secondary text-xs font-bold px-3 py-1 rounded-full">
               {newCount} novo{newCount > 1 ? "s" : ""}

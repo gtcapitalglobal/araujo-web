@@ -192,7 +192,7 @@ export default function ReportsPage() {
     <div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent">RELATORIOS</h1>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title">RELATORIOS</h1>
         <button
           onClick={exportCSV}
           className="flex items-center gap-2 bg-gradient-to-r from-accent to-legendary text-bg font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity"
@@ -272,7 +272,7 @@ export default function ReportsPage() {
                 <Car size={18} className="text-accent" />
                 <span className="text-text-muted text-xs font-medium">Milhas no Periodo</span>
               </div>
-              <p className="text-2xl font-black text-accent">{totalMiles.toFixed(1)} mi</p>
+              <p className="text-2xl font-black section-title">{totalMiles.toFixed(1)} mi</p>
               <p className="text-sm text-text-muted mt-1">
                 Deducao IRS: <span className="text-success font-bold">${mileageDeduction.toFixed(2)}</span> (${MILEAGE_RATE}/mi)
               </p>

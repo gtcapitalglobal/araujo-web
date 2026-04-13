@@ -83,7 +83,7 @@ export default function ChecklistPage() {
 
   return (
     <div>
-      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black text-accent mb-2">CHECKLIST</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title mb-2">CHECKLIST</h1>
       <p className="text-text-muted text-sm mb-8">{monthNames[month - 1]} {year}</p>
 
       {/* Tabs */}
