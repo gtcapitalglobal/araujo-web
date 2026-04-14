@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   DollarSign, Briefcase, Users, Car, MessageSquare, Bell,
   ArrowRight, Clock, CheckCircle, AlertTriangle, StickyNote, Building2,
-  TrendingUp, TrendingDown, MessageCircle
+  TrendingUp, TrendingDown, MessageCircle, RefreshCw, Loader2
 } from "lucide-react";
 import { getNextDueDate } from "@/lib/recurring";
 
@@ -87,14 +87,17 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState("");
   const [paidId, setPaidId] = useState<string | null>(null);
+  const [payingId, setPayingId] = useState<string | null>(null);
   const [company, setCompany] = useState<CompanyData>({});
   const [period, setPeriod] = useState<Period>("month");
 
   const handlePayExpense = async (exp: DashboardData["upcomingExpenses"][0]) => {
-    if (exp.source === "recurring") {
+    if (exp.source !== "recurring") return;
+    setPayingId(exp.id);
+    try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      await supabase.from("money_entries").insert({
+      if (!user) { setPayingId(null); return; }
+      const { error: insertErr } = await supabase.from("money_entries").insert({
         id: crypto.randomUUID(),
         user_id: user.id,
         kind: "expense",
@@ -104,13 +107,15 @@ export default function AdminDashboard() {
         date: new Date().toISOString().split("T")[0],
         notes: `Despesa recorrente: ${exp.category}${exp.description ? " - " + exp.description : ""}`,
       });
+      if (insertErr) { setPayingId(null); return; }
       const nextDue = getNextDueDate(exp.next_due, exp.frequency);
       await supabase.from("recurring_expenses").update({ next_due: nextDue }).eq("id", exp.id);
+      setPaidId(exp.id);
+      setTimeout(() => setPaidId(null), 2000);
+      fetchData();
+    } finally {
+      setPayingId(null);
     }
-    // For money entries, just mark as paid visually
-    setPaidId(exp.id);
-    setTimeout(() => setPaidId(null), 2000);
-    fetchData();
   };
 
   useEffect(() => {
@@ -131,10 +136,11 @@ export default function AdminDashboard() {
       incomeRes, expensesRes,
       prevIncomeRes, prevExpensesRes,
       mileageRes, quotesCountRes, remindersCountRes, todayJobsRes, recentQuotesRes,
-      upcomingRemindersRes, recentMoneyRes, pinnedNotesRes, upcomingExpensesRes, upcomingMoneyRes
+      upcomingRemindersRes, recentMoneyRes, pinnedNotesRes, upcomingExpensesRes, upcomingMoneyRes,
+      companyRes
     ] = await Promise.all([
       supabase.from("clients").select("id", { count: "exact", head: true }),
-      supabase.from("jobs").select("id", { count: "exact", head: true }).neq("status", "cancelled"),
+      supabase.from("jobs").select("id", { count: "exact", head: true }).in("status", ["lead", "estimated", "scheduled", "in_progress"]),
       supabase.from("money_entries").select("amount").eq("kind", "income").gte("date", range.start).lt("date", range.end),
       supabase.from("money_entries").select("amount").eq("kind", "expense").gte("date", range.start).lt("date", range.end),
       supabase.from("money_entries").select("amount").eq("kind", "income").gte("date", range.prevStart).lt("date", range.prevEnd),
@@ -142,13 +148,14 @@ export default function AdminDashboard() {
       supabase.from("mileage_logs").select("miles").gte("date", `${year}-01-01`),
       supabase.from("quote_requests").select("id", { count: "exact", head: true }).eq("status", "new"),
       supabase.from("reminders").select("id", { count: "exact", head: true }).eq("is_done", false).lte("due_date", now.toISOString()),
-      supabase.from("jobs").select("id, title, status").lte("start_date", today).or(`end_date.gte.${today},end_date.is.null`).neq("status", "cancelled").limit(5),
+      supabase.from("jobs").select("id, title, status").lte("start_date", today).or(`end_date.gte.${today},end_date.is.null`).in("status", ["lead", "estimated", "scheduled", "in_progress"]).limit(5),
       supabase.from("quote_requests").select("id, name, service, created_at").order("created_at", { ascending: false }).limit(5),
       supabase.from("reminders").select("id, title, due_date, is_done").eq("is_done", false).order("due_date").limit(5),
       supabase.from("money_entries").select("id, kind, category, amount, date").order("date", { ascending: false }).limit(5),
       supabase.from("notes").select("id, title, content").eq("pinned", true).limit(3),
       supabase.from("recurring_expenses").select("id, category, description, amount, next_due, frequency").eq("is_active", true).not("next_due", "is", null).lte("next_due", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]).order("next_due"),
       supabase.from("money_entries").select("id, category, notes, amount, date").eq("kind", "expense").gte("date", today).lte("date", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]).order("date"),
+      supabase.from("company_info").select("*").limit(1).maybeSingle(),
     ]);
 
     const totalIncome = incomeRes.data?.reduce((s, e) => s + (e.amount || 0), 0) || 0;
@@ -181,8 +188,6 @@ export default function AdminDashboard() {
         ...(upcomingMoneyRes.data || []).map((e: any) => ({ id: e.id, category: e.category || "Outro", description: e.notes || null, amount: e.amount, next_due: e.date, frequency: "unica", source: "money" as const })),
       ].sort((a, b) => a.next_due.localeCompare(b.next_due)),
     });
-    // Fetch company info for share buttons
-    const companyRes = await supabase.from("company_info").select("*").limit(1).maybeSingle();
     if (companyRes.data) setCompany(companyRes.data);
 
     setLoading(false);
@@ -290,11 +295,16 @@ export default function AdminDashboard() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black gradient-text-gold">{greeting.toUpperCase()}, GUSTAVO!</h1>
-        <p className="text-text-muted text-sm mt-1">
-          {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-        </p>
+      <div className="flex items-start justify-between mb-8">
+        <div>
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-black gradient-text-gold">{greeting.toUpperCase()}, GUSTAVO!</h1>
+          <p className="text-text-muted text-sm mt-1">
+            {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+          </p>
+        </div>
+        <button onClick={() => { setLoading(true); fetchData(); }} className="p-2.5 rounded-xl bg-surface border border-border hover:border-primary/40 text-text-muted hover:text-primary transition-all" title="Atualizar">
+          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+        </button>
       </div>
 
       {/* Alerts */}
@@ -426,13 +436,13 @@ export default function AdminDashboard() {
           {data.todayJobs.length > 0 ? (
             <div className="space-y-3">
               {data.todayJobs.map((job) => (
-                <div key={job.id} className="flex items-center justify-between bg-card rounded-xl p-3">
+                <Link key={job.id} href="/admin/jobs" className="flex items-center justify-between bg-card rounded-xl p-3 hover:bg-card/80 transition-colors">
                   <div>
                     <p className="text-sm font-semibold text-text">{job.title}</p>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[job.status] || ""}`}>{job.status}</span>
                   </div>
                   <Clock size={14} className="text-text-muted" />
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -451,7 +461,7 @@ export default function AdminDashboard() {
               {data.upcomingReminders.map((r) => {
                 const isOverdue = new Date(r.due_date) < new Date();
                 return (
-                  <div key={r.id} className={`flex items-center justify-between bg-card rounded-xl p-3 ${isOverdue ? "border border-warning/30" : ""}`}>
+                  <Link key={r.id} href="/admin/reminders" className={`flex items-center justify-between bg-card rounded-xl p-3 hover:bg-card/80 transition-colors ${isOverdue ? "border border-warning/30" : ""}`}>
                     <div className="flex items-center gap-3">
                       {isOverdue ? <AlertTriangle size={14} className="text-warning" /> : <Bell size={14} className="text-text-muted" />}
                       <div>
@@ -461,7 +471,7 @@ export default function AdminDashboard() {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -511,9 +521,10 @@ export default function AdminDashboard() {
                     {exp.source === "recurring" && (
                       <button
                         onClick={() => handlePayExpense(exp)}
-                        className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${paidId === exp.id ? "bg-success/20 text-success" : "bg-accent/20 text-accent hover:bg-accent/30"}`}
+                        disabled={payingId === exp.id}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${paidId === exp.id ? "bg-success/20 text-success" : payingId === exp.id ? "bg-accent/10 text-accent/50" : "bg-accent/20 text-accent hover:bg-accent/30"}`}
                       >
-                        {paidId === exp.id ? "✓" : "Pagar"}
+                        {paidId === exp.id ? "✓" : payingId === exp.id ? <Loader2 size={12} className="animate-spin" /> : "Pagar"}
                       </button>
                     )}
                   </div>
@@ -534,13 +545,13 @@ export default function AdminDashboard() {
           {data.recentQuotes.length > 0 ? (
             <div className="space-y-3">
               {data.recentQuotes.map((q) => (
-                <div key={q.id} className="flex items-center justify-between bg-card rounded-xl p-3">
+                <Link key={q.id} href="/admin/quotes" className="flex items-center justify-between bg-card rounded-xl p-3 hover:bg-card/80 transition-colors">
                   <div>
                     <p className="text-sm font-semibold text-text">{q.name}</p>
                     <p className="text-xs text-text-muted">{q.service || "Sem servico"}</p>
                   </div>
                   <span className="text-xs text-text-muted">{new Date(q.created_at).toLocaleDateString("pt-BR")}</span>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -557,15 +568,15 @@ export default function AdminDashboard() {
           {data.recentMoney.length > 0 ? (
             <div className="space-y-3">
               {data.recentMoney.map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between bg-card rounded-xl p-3">
+                <Link key={entry.id} href="/admin/money" className="flex items-center justify-between bg-card rounded-xl p-3 hover:bg-card/80 transition-colors">
                   <div>
                     <p className="text-sm font-semibold text-text">{entry.category || "Sem categoria"}</p>
-                    <span className="text-xs text-text-muted">{entry.date}</span>
+                    <span className="text-xs text-text-muted">{new Date(entry.date + "T00:00:00").toLocaleDateString("pt-BR")}</span>
                   </div>
                   <span className={`font-bold text-sm ${entry.kind === "income" ? "text-money-in" : "text-money-out"}`}>
                     {entry.kind === "income" ? "+" : "-"}${entry.amount.toFixed(2)}
                   </span>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -583,10 +594,10 @@ export default function AdminDashboard() {
           </div>
           <div className="grid sm:grid-cols-3 gap-3">
             {data.pinnedNotes.map((note) => (
-              <div key={note.id} className="bg-accent/5 border border-accent/20 rounded-xl p-4">
+              <Link key={note.id} href="/admin/notes" className="bg-accent/5 border border-accent/20 rounded-xl p-4 hover:bg-accent/10 transition-colors block">
                 {note.title && <p className="text-sm font-bold text-accent mb-1">{note.title}</p>}
                 <p className="text-text-secondary text-xs line-clamp-3">{note.content}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
