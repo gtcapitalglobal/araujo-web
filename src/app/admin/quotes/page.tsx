@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { MessageSquare, Phone, Mail, Trash2, ChevronDown } from "lucide-react";
+import { MessageSquare, Phone, Mail, Trash2, ChevronDown, Briefcase } from "lucide-react";
 
 interface QuoteRequest {
   id: string;
@@ -32,9 +33,11 @@ const statusLabels: Record<string, string> = {
 
 export default function QuotesPage() {
   const supabase = createClient();
+  const router = useRouter();
   const [quotes, setQuotes] = useState<QuoteRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [creatingJob, setCreatingJob] = useState<string | null>(null);
 
   const fetchQuotes = useCallback(async () => {
     setLoading(true);
@@ -57,6 +60,39 @@ export default function QuotesPage() {
     if (!confirm("Deletar este pedido?")) return;
     await supabase.from("quote_requests").delete().eq("id", id);
     fetchQuotes();
+  };
+
+  const handleCreateJob = async (q: QuoteRequest) => {
+    setCreatingJob(q.id);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setCreatingJob(null); return; }
+
+    // Check if client with same name exists
+    let clientId: string;
+    const { data: existing } = await supabase
+      .from("clients").select("id").eq("name", q.name).limit(1).single();
+
+    if (existing) {
+      clientId = existing.id;
+    } else {
+      clientId = crypto.randomUUID();
+      await supabase.from("clients").insert({
+        id: clientId, user_id: user.id, name: q.name,
+        phone: q.phone || null, email: q.email || null,
+      });
+    }
+
+    // Create job
+    await supabase.from("jobs").insert({
+      id: crypto.randomUUID(), user_id: user.id, client_id: clientId,
+      title: q.service || `Job - ${q.name}`, service_type: q.service || null,
+      status: "lead", notes: q.message || null,
+    });
+
+    // Mark quote as closed
+    await supabase.from("quote_requests").update({ status: "closed" }).eq("id", q.id);
+    setCreatingJob(null);
+    router.push("/admin/jobs");
   };
 
   const newCount = quotes.filter((q) => q.status === "new").length;
@@ -150,8 +186,15 @@ export default function QuotesPage() {
                       </button>
                     ))}
                     <button
+                      onClick={() => handleCreateJob(q)}
+                      disabled={creatingJob === q.id}
+                      className="ml-auto flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition disabled:opacity-50"
+                    >
+                      <Briefcase size={13} /> {creatingJob === q.id ? "Criando..." : "Criar Job"}
+                    </button>
+                    <button
                       onClick={() => deleteQuote(q.id)}
-                      className="ml-auto p-2 rounded-lg hover:bg-error/10 text-text-muted hover:text-error transition"
+                      className="p-2 rounded-lg hover:bg-error/10 text-text-muted hover:text-error transition"
                     >
                       <Trash2 size={14} />
                     </button>

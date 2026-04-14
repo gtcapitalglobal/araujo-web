@@ -190,6 +190,13 @@ export default function AdminDashboard() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // Re-fetch when tab becomes visible (fixes stale data after midnight)
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === "visible") fetchData(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [fetchData]);
+
   // Share button handlers
   const sharePaymentWhatsApp = () => {
     const msg = `*Araujo Company LLC*\nPayment info:\n👉 https://www.araujocompany.com/pay`;

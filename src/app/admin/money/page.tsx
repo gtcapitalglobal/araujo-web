@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { MoneyEntry } from "@/lib/types";
-import { DollarSign, TrendingUp, TrendingDown, Plus, Trash2, X, RefreshCw } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Plus, Trash2, X, RefreshCw, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { frequencyOptions, getNextDueDate } from "@/lib/recurring";
 
 const incomeCategories = ["Service", "Material Reimbursement", "Referral", "Other Income"];
@@ -29,22 +29,23 @@ function MoneyPageContent() {
   const [form, setForm] = useState({ category: "", subcategory: "", amount: "", date: new Date().toISOString().slice(0, 10), notes: "", isRecurring: false, frequency: "mensal" });
   const [saving, setSaving] = useState(false);
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const monthStart = `${year}-${String(month).padStart(2, "0")}-01`;
-  const nextMonth = month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, "0")}-01`;
+  const [filterYear, setFilterYear] = useState(new Date().getFullYear());
+  const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
+
+  const monthStart = `${filterYear}-${String(filterMonth).padStart(2, "0")}-01`;
+  const nextMonth = filterMonth === 12 ? `${filterYear + 1}-01-01` : `${filterYear}-${String(filterMonth + 1).padStart(2, "0")}-01`;
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
       .from("money_entries")
       .select("*")
-      .order("date", { ascending: false })
-      .limit(50);
+      .gte("date", monthStart)
+      .lt("date", nextMonth)
+      .order("date", { ascending: false });
     setEntries(data || []);
     setLoading(false);
-  }, [supabase]);
+  }, [supabase, monthStart, nextMonth]);
 
   useEffect(() => { fetchEntries(); }, [fetchEntries]);
 
@@ -60,10 +61,18 @@ function MoneyPageContent() {
     }
   }, [searchParams, router]);
 
-  const monthEntries = entries.filter((e) => e.date >= monthStart && e.date < nextMonth);
-  const monthIncome = monthEntries.filter((e) => e.kind === "income").reduce((s, e) => s + e.amount, 0);
-  const monthExpenses = monthEntries.filter((e) => e.kind === "expense").reduce((s, e) => s + e.amount, 0);
+  const monthIncome = entries.filter((e) => e.kind === "income").reduce((s, e) => s + e.amount, 0);
+  const monthExpenses = entries.filter((e) => e.kind === "expense").reduce((s, e) => s + e.amount, 0);
   const monthProfit = monthIncome - monthExpenses;
+
+  const navigateMonth = (delta: number) => {
+    let m = filterMonth + delta;
+    let y = filterYear;
+    if (m > 12) { m = 1; y++; }
+    if (m < 1) { m = 12; y--; }
+    setFilterMonth(m);
+    setFilterYear(y);
+  };
 
   const openModal = (kind: "income" | "expense") => {
     setModalKind(kind);
@@ -115,28 +124,42 @@ function MoneyPageContent() {
 
   return (
     <div>
-      <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title mb-8">DINHEIRO</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title">DINHEIRO</h1>
+        <div className="flex items-center gap-2">
+          <button onClick={() => navigateMonth(-1)} className="p-2 rounded-lg hover:bg-card border border-border text-text-secondary hover:text-text transition-colors">
+            <ChevronLeft size={18} />
+          </button>
+          <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-2">
+            <Calendar size={16} className="text-primary" />
+            <span className="font-bold text-text text-sm">{monthNames[filterMonth - 1]} {filterYear}</span>
+          </div>
+          <button onClick={() => navigateMonth(1)} className="p-2 rounded-lg hover:bg-card border border-border text-text-secondary hover:text-text transition-colors">
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="stat-card bg-money-in/10 border border-money-in/30 rounded-2xl p-5" style={{ "--stat-glow": "rgba(34,197,94,0.3)" } as React.CSSProperties}>
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp size={20} className="text-money-in" />
-            <span className="text-text-muted text-xs font-medium">Receita - {monthNames[month - 1]}</span>
+            <span className="text-text-muted text-xs font-medium">Receita - {monthNames[filterMonth - 1]}</span>
           </div>
           <p className="text-2xl font-black text-money-in">${monthIncome.toFixed(2)}</p>
         </div>
         <div className="stat-card bg-money-out/10 border border-money-out/30 rounded-2xl p-5" style={{ "--stat-glow": "rgba(255,77,77,0.3)" } as React.CSSProperties}>
           <div className="flex items-center gap-2 mb-2">
             <TrendingDown size={20} className="text-money-out" />
-            <span className="text-text-muted text-xs font-medium">Despesas - {monthNames[month - 1]}</span>
+            <span className="text-text-muted text-xs font-medium">Despesas - {monthNames[filterMonth - 1]}</span>
           </div>
           <p className="text-2xl font-black text-money-out">${monthExpenses.toFixed(2)}</p>
         </div>
         <div className="stat-card bg-profit/10 border border-profit/30 rounded-2xl p-5" style={{ "--stat-glow": "rgba(255,214,0,0.3)" } as React.CSSProperties}>
           <div className="flex items-center gap-2 mb-2">
             <DollarSign size={20} className="text-profit" />
-            <span className="text-text-muted text-xs font-medium">Lucro - {monthNames[month - 1]}</span>
+            <span className="text-text-muted text-xs font-medium">Lucro - {monthNames[filterMonth - 1]}</span>
           </div>
           <p className={`text-2xl font-black ${monthProfit >= 0 ? "text-profit" : "text-money-out"}`}>${monthProfit.toFixed(2)}</p>
         </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Helper, HelperPayment } from "@/lib/types";
-import { HardHat, Plus, Pencil, Trash2, X, Phone, DollarSign } from "lucide-react";
+import { HardHat, Plus, Pencil, Trash2, X, Phone, DollarSign, AlertTriangle } from "lucide-react";
 
 const taxStatusColors: Record<string, string> = {
   w9_received: "bg-success/20 text-success",
@@ -142,6 +142,28 @@ export default function HelpersPage() {
                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-text-secondary">
                       {h.phone && <span className="flex items-center gap-1"><Phone size={13} /> {h.phone}</span>}
                       <span className="flex items-center gap-1"><DollarSign size={13} /> Total pago: ${paid.toFixed(2)}</span>
+                    </div>
+                    {/* 1099 Threshold Progress */}
+                    <div className="mt-2">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="flex-1 h-2 bg-card rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${paid >= 600 ? "bg-error" : paid >= 500 ? "bg-warning" : "bg-success"}`}
+                            style={{ width: `${Math.min((paid / 600) * 100, 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-text-muted shrink-0">${paid.toFixed(0)} / $600</span>
+                      </div>
+                      {paid >= 600 && (
+                        <div className="flex items-center gap-1.5 text-xs text-error font-bold">
+                          <AlertTriangle size={12} /> 1099 obrigatorio — acima de $600
+                        </div>
+                      )}
+                      {paid >= 500 && paid < 600 && (
+                        <div className="flex items-center gap-1.5 text-xs text-warning font-bold">
+                          <AlertTriangle size={12} /> Proximo do limite 1099 ($600)
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">

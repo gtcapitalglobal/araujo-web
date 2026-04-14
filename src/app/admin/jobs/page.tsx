@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Job, Client, JobStatus } from "@/lib/types";
-import { Briefcase, Plus, Pencil, Trash2, X, Search } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, X, Search, LayoutGrid, List } from "lucide-react";
 
 const statuses: { key: JobStatus | "all"; label: string }[] = [
   { key: "all", label: "Todos" },
@@ -43,6 +43,7 @@ export default function JobsPage() {
   const [editing, setEditing] = useState<Job | null>(null);
   const [form, setForm] = useState(emptyJob);
   const [saving, setSaving] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "board">("list");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -120,9 +121,19 @@ export default function JobsPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <h1 className="font-[family-name:var(--font-display)] text-2xl font-black section-title">JOBS</h1>
-        <button onClick={openNew} className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity">
-          <Plus size={18} /> Novo Job
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex bg-card border border-border rounded-xl overflow-hidden">
+            <button onClick={() => setViewMode("list")} className={`px-3 py-2 transition-colors ${viewMode === "list" ? "bg-primary text-white" : "text-text-secondary hover:text-text"}`}>
+              <List size={18} />
+            </button>
+            <button onClick={() => setViewMode("board")} className={`px-3 py-2 transition-colors ${viewMode === "board" ? "bg-primary text-white" : "text-text-secondary hover:text-text"}`}>
+              <LayoutGrid size={18} />
+            </button>
+          </div>
+          <button onClick={openNew} className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity">
+            <Plus size={18} /> Novo Job
+          </button>
+        </div>
       </div>
 
       {/* Status Tabs */}
@@ -142,13 +153,41 @@ export default function JobsPage() {
           className="w-full bg-card border border-border rounded-xl pl-11 pr-4 py-3 text-text focus:border-primary focus:outline-none transition-colors" />
       </div>
 
-      {/* Jobs List */}
+      {/* Jobs List / Board */}
       {loading ? (
         <div className="space-y-4 py-4">{[...Array(4)].map((_, i) => <div key={i} className="skeleton h-16 rounded-2xl" />)}</div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20">
           <Briefcase size={48} className="mx-auto text-text-muted mb-4" />
           <p className="text-text-muted">Nenhum job encontrado</p>
+        </div>
+      ) : viewMode === "board" ? (
+        <div className="overflow-x-auto pb-4">
+          <div className="flex gap-3" style={{ minWidth: "900px" }}>
+            {statuses.filter((s) => s.key !== "all").map((s) => {
+              const colJobs = filtered.filter((j) => j.status === s.key);
+              return (
+                <div key={s.key} className="flex-1 min-w-[140px]">
+                  <div className={`text-xs font-bold px-3 py-2 rounded-t-xl flex items-center justify-between ${statusColors[s.key] || "bg-card text-text-muted"}`}>
+                    <span>{s.label}</span>
+                    <span className="opacity-70">{colJobs.length}</span>
+                  </div>
+                  <div className="bg-card/30 border border-border border-t-0 rounded-b-xl p-2 space-y-2 min-h-[120px]">
+                    {colJobs.map((j) => {
+                      const clientName = (j.client as unknown as { name: string })?.name;
+                      return (
+                        <div key={j.id} onClick={() => openEdit(j)} className="bg-surface border border-border rounded-xl p-3 cursor-pointer hover:border-primary/30 transition-colors">
+                          <p className="text-sm font-bold text-text truncate">{j.title}</p>
+                          {clientName && <p className="text-xs text-text-muted mt-1">{clientName}</p>}
+                          {j.estimate_amount != null && <p className="text-xs text-accent font-bold mt-1">${j.estimate_amount.toLocaleString()}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : (
         <div className="grid gap-3">
