@@ -30,8 +30,7 @@ export default function MileagePage() {
 
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
 
-  const yearLogs = logs.filter((l) => l.date.startsWith(String(year)));
-  const totalMiles = yearLogs.reduce((s, l) => s + l.miles, 0);
+  const totalMiles = logs.reduce((s, l) => s + l.miles, 0);
   const deduction = totalMiles * MILEAGE_RATE;
 
   const handleSave = async () => {

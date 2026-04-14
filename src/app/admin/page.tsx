@@ -220,7 +220,7 @@ export default function AdminDashboard() {
       c.phone ? `📱 ${c.phone}` : "",
       c.email ? `📧 ${c.email}` : "",
       c.address_line1 ? `📍 ${c.address_line1}` : "",
-      c.website ? `🕐 ${c.website}` : "",
+      c.website ? `🌐 ${c.website}` : "",
       "",
       c.naics_code ? `📋 NAICS: ${c.naics_code}` : "",
       c.sic_code ? `📋 SIC: ${c.sic_code}` : "",
@@ -496,7 +496,7 @@ export default function AdminDashboard() {
           </div>
           <div className="space-y-3">
             {data.upcomingExpenses.map((exp) => {
-              const dueDate = new Date(exp.next_due);
+              const dueDate = new Date(exp.next_due + "T00:00:00");
               const today = new Date();
               today.setHours(0, 0, 0, 0);
               const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));

@@ -146,6 +146,7 @@ export default function Sidebar() {
           <Link
             href="/"
             target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] text-text-muted hover:text-secondary hover:bg-card/60 transition-all mb-1"
           >
             <ExternalLink size={16} />

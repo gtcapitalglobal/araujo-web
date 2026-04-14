@@ -51,8 +51,10 @@ export default function QuotesPage() {
 
   useEffect(() => { fetchQuotes(); }, [fetchQuotes]);
 
-  const updateStatus = async (id: string, status: string) => {
-    await supabase.from("quote_requests").update({ status }).eq("id", id);
+  const updateStatus = async (id: string, newStatus: string) => {
+    const quote = quotes.find((q) => q.id === id);
+    if (quote?.status === newStatus) return;
+    await supabase.from("quote_requests").update({ status: newStatus }).eq("id", id);
     fetchQuotes();
   };
 

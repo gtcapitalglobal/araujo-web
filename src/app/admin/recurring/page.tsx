@@ -196,7 +196,7 @@ export default function RecurringPage() {
                 )}
                 {e.next_due && (
                   <p className="text-xs text-text-muted mt-1">
-                    Proximo vencimento: {new Date(e.next_due).toLocaleDateString("pt-BR")}
+                    Proximo vencimento: {new Date(e.next_due + "T00:00:00").toLocaleDateString("pt-BR")}
                   </p>
                 )}
               </div>

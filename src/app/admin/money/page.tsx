@@ -228,7 +228,7 @@ function MoneyPageContent() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">{e.category || "Sem categoria"}</p>
-                  <p className="text-xs text-text-muted">{e.date}{e.notes ? ` - ${e.notes}` : ""}</p>
+                  <p className="text-xs text-text-muted">{new Date(e.date + "T00:00:00").toLocaleDateString("pt-BR")}{e.notes ? ` - ${e.notes}` : ""}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -279,7 +279,7 @@ function MoneyPageContent() {
                 <label className="text-xs text-text-muted mb-1 block">Notas</label>
                 <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full bg-card border border-border rounded-xl px-4 py-3 text-text focus:border-primary focus:outline-none resize-none" />
               </div>
-              {modalKind === "expense" && (
+              {modalKind === "expense" && !editingEntry && (
                 <div className="bg-card/50 border border-border rounded-xl p-4 space-y-3">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input

@@ -13,7 +13,7 @@ const taxStatusColors: Record<string, string> = {
 };
 
 const emptyHelper = { name: "", phone: "", email: "", address: "", tax_id_status: "", notes: "" };
-const emptyPayment = { helper_id: "", date: new Date().toISOString().slice(0, 10), amount: "", method: "", notes: "" };
+const emptyPayment = { helper_id: "", date: "", amount: "", method: "", notes: "" };
 
 export default function HelpersPage() {
   const supabase = createClient();
@@ -81,7 +81,7 @@ export default function HelpersPage() {
   };
 
   const openPayment = (helperId?: string) => {
-    setPaymentForm({ ...emptyPayment, helper_id: helperId || "" });
+    setPaymentForm({ ...emptyPayment, helper_id: helperId || "", date: new Date().toISOString().slice(0, 10) });
     setShowPaymentModal(true);
   };
 
@@ -185,7 +185,7 @@ export default function HelpersPage() {
                 </div>
                 {/* Payment History */}
                 {expandedHelper === h.id && (() => {
-                  const helperPayments = payments.filter((p) => p.helper_id === h.id);
+                  const helperPayments = payments.filter((p) => p.helper_id === h.id && p.date.startsWith(currentYear));
                   return helperPayments.length > 0 ? (
                     <div className="mt-3 border-t border-border pt-3">
                       <p className="text-xs font-bold text-text-muted mb-2">Historico de Pagamentos</p>

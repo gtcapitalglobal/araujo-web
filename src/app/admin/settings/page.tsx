@@ -51,17 +51,22 @@ export default function SettingsPage() {
       mileage_rate: form.mileage_rate ? parseFloat(form.mileage_rate) : null,
       currency: form.currency || null,
     };
+    let err = null;
     if (settings) {
-      await supabase.from("settings").update(payload).eq("id", settings.id);
+      const res = await supabase.from("settings").update(payload).eq("id", settings.id);
+      err = res.error;
     } else {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setSaving(false); return; }
-      await supabase.from("settings").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
+      const res = await supabase.from("settings").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
+      err = res.error;
     }
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-    fetchSettings();
+    if (!err) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+      fetchSettings();
+    }
   };
 
   const handleLogout = async () => {

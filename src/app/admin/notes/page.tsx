@@ -228,7 +228,7 @@ export default function NotesPage() {
               </button>
               <button
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || (!form.title.trim() && !form.content.trim())}
                 className="flex-1 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-xl py-3 hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {saving ? "Salvando..." : "Salvar"}

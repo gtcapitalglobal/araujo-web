@@ -80,7 +80,7 @@ export default function CalendarPage() {
     const endMonth = currentMonth === 11
       ? `${currentYear + 1}-01-01`
       : `${currentYear}-${String(currentMonth + 2).padStart(2, "0")}-01`;
-    const todayStr = today.toISOString().split("T")[0];
+    const todayStr = new Date().toISOString().split("T")[0];
 
     const [jobsRes, remindersRes, expensesRes] = await Promise.all([
       supabase
@@ -181,8 +181,9 @@ export default function CalendarPage() {
   };
 
   const goToday = () => {
-    setCurrentYear(today.getFullYear());
-    setCurrentMonth(today.getMonth());
+    const now = new Date();
+    setCurrentYear(now.getFullYear());
+    setCurrentMonth(now.getMonth());
     setSelectedDate(null);
   };
 
@@ -193,7 +194,8 @@ export default function CalendarPage() {
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const nowForGrid = new Date();
+  const todayStr = `${nowForGrid.getFullYear()}-${String(nowForGrid.getMonth() + 1).padStart(2, "0")}-${String(nowForGrid.getDate()).padStart(2, "0")}`;
 
   const eventsByDate = (day: number) => {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;

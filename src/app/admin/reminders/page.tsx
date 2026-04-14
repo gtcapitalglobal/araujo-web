@@ -49,9 +49,7 @@ export default function RemindersPage() {
     fetchReminders();
   }, [fetchReminders]);
 
-  const now = new Date();
-
-  const isOverdue = (r: Reminder) => !r.is_done && new Date(r.due_date) < now;
+  const isOverdue = (r: Reminder) => !r.is_done && new Date(r.due_date) < new Date();
 
   const filtered = reminders.filter((r) => {
     switch (filter) {
