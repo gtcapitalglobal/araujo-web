@@ -93,7 +93,7 @@ export default function JobsPage() {
       await supabase.from("jobs").update(payload).eq("id", editing.id);
     } else {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) { setSaving(false); return; }
       await supabase.from("jobs").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
     }
     setSaving(false);

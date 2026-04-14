@@ -142,7 +142,7 @@ export default function AdminDashboard() {
       supabase.from("mileage_logs").select("miles").gte("date", `${year}-01-01`),
       supabase.from("quote_requests").select("id", { count: "exact", head: true }).eq("status", "new"),
       supabase.from("reminders").select("id", { count: "exact", head: true }).eq("is_done", false).lte("due_date", now.toISOString()),
-      supabase.from("jobs").select("id, title, status").gte("start_date", today).lte("start_date", today).limit(5),
+      supabase.from("jobs").select("id, title, status").lte("start_date", today).or(`end_date.gte.${today},end_date.is.null`).neq("status", "cancelled").limit(5),
       supabase.from("quote_requests").select("id, name, service, created_at").order("created_at", { ascending: false }).limit(5),
       supabase.from("reminders").select("id, title, due_date, is_done").eq("is_done", false).order("due_date").limit(5),
       supabase.from("money_entries").select("id, kind, category, amount, date").order("date", { ascending: false }).limit(5),
@@ -508,12 +508,14 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-error font-bold text-sm">${exp.amount.toFixed(2)}</span>
-                    <button
-                      onClick={() => handlePayExpense(exp)}
-                      className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${paidId === exp.id ? "bg-success/20 text-success" : "bg-accent/20 text-accent hover:bg-accent/30"}`}
-                    >
-                      {paidId === exp.id ? "✓" : "Pagar"}
-                    </button>
+                    {exp.source === "recurring" && (
+                      <button
+                        onClick={() => handlePayExpense(exp)}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${paidId === exp.id ? "bg-success/20 text-success" : "bg-accent/20 text-accent hover:bg-accent/30"}`}
+                      >
+                        {paidId === exp.id ? "✓" : "Pagar"}
+                      </button>
+                    )}
                   </div>
                 </div>
               );

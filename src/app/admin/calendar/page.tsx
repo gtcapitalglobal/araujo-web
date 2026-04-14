@@ -161,6 +161,13 @@ export default function CalendarPage() {
 
   useEffect(() => { fetchEvents(); }, [fetchEvents]);
 
+  // Re-fetch when tab becomes visible (fixes stale data after midnight)
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === "visible") fetchEvents(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [fetchEvents]);
+
   const prevMonth = () => {
     if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); }
     else setCurrentMonth(currentMonth - 1);

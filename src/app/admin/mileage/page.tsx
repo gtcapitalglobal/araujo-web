@@ -22,6 +22,7 @@ export default function MileagePage() {
     const { data } = await supabase
       .from("mileage_logs")
       .select("*")
+      .gte("date", `${year}-01-01`)
       .order("date", { ascending: false });
     setLogs(data || []);
     setLoading(false);
@@ -36,7 +37,7 @@ export default function MileagePage() {
   const handleSave = async () => {
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) { setSaving(false); return; }
     await supabase.from("mileage_logs").insert({
       id: crypto.randomUUID(),
       user_id: user.id,

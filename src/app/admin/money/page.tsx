@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { MoneyEntry } from "@/lib/types";
-import { DollarSign, TrendingUp, TrendingDown, Plus, Trash2, X, RefreshCw, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Plus, Trash2, X, RefreshCw, Calendar, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { frequencyOptions, getNextDueDate } from "@/lib/recurring";
 
 const incomeCategories = ["Service", "Material Reimbursement", "Referral", "Other Income"];
@@ -28,6 +28,7 @@ function MoneyPageContent() {
   const [modalKind, setModalKind] = useState<"income" | "expense">("income");
   const [form, setForm] = useState({ category: "", subcategory: "", amount: "", date: new Date().toISOString().slice(0, 10), notes: "", isRecurring: false, frequency: "mensal" });
   const [saving, setSaving] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<MoneyEntry | null>(null);
 
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
@@ -74,28 +75,62 @@ function MoneyPageContent() {
     setFilterYear(y);
   };
 
+  const getDefaultDate = () => {
+    const now = new Date();
+    if (filterYear === now.getFullYear() && filterMonth === now.getMonth() + 1) return now.toISOString().slice(0, 10);
+    return `${filterYear}-${String(filterMonth).padStart(2, "0")}-01`;
+  };
+
   const openModal = (kind: "income" | "expense") => {
+    setEditingEntry(null);
     setModalKind(kind);
-    setForm({ category: "", subcategory: "", amount: "", date: new Date().toISOString().slice(0, 10), notes: "", isRecurring: false, frequency: "mensal" });
+    setForm({ category: "", subcategory: "", amount: "", date: getDefaultDate(), notes: "", isRecurring: false, frequency: "mensal" });
+    setShowModal(true);
+  };
+
+  const openEdit = (entry: MoneyEntry) => {
+    setEditingEntry(entry);
+    setModalKind(entry.kind);
+    setForm({
+      category: entry.category || "",
+      subcategory: entry.subcategory || "",
+      amount: entry.amount.toString(),
+      date: entry.date,
+      notes: entry.notes || "",
+      isRecurring: false,
+      frequency: "mensal",
+    });
     setShowModal(true);
   };
 
   const handleSave = async () => {
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from("money_entries").insert({
-      id: crypto.randomUUID(),
-      user_id: user.id,
-      kind: modalKind,
-      category: form.category || null,
-      subcategory: form.subcategory || null,
-      amount: parseFloat(form.amount),
-      date: form.date,
-      notes: form.notes || null,
-    });
+    if (!user) { setSaving(false); return; }
+
+    if (editingEntry) {
+      await supabase.from("money_entries").update({
+        kind: modalKind,
+        category: form.category || null,
+        subcategory: form.subcategory || null,
+        amount: parseFloat(form.amount),
+        date: form.date,
+        notes: form.notes || null,
+      }).eq("id", editingEntry.id);
+    } else {
+      await supabase.from("money_entries").insert({
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        kind: modalKind,
+        category: form.category || null,
+        subcategory: form.subcategory || null,
+        amount: parseFloat(form.amount),
+        date: form.date,
+        notes: form.notes || null,
+      });
+    }
     // Create recurring expense if checked
-    if (form.isRecurring && modalKind === "expense") {
+    if (!editingEntry && form.isRecurring && modalKind === "expense") {
       const nextDue = getNextDueDate(form.date, form.frequency);
       await supabase.from("recurring_expenses").insert({
         id: crypto.randomUUID(),
@@ -200,6 +235,9 @@ function MoneyPageContent() {
                 <span className={`font-bold ${e.kind === "income" ? "text-money-in" : "text-money-out"}`}>
                   {e.kind === "income" ? "+" : "-"}${e.amount.toFixed(2)}
                 </span>
+                <button onClick={() => openEdit(e)} className="p-2 rounded-lg hover:bg-card text-text-muted hover:text-secondary transition-colors">
+                  <Pencil size={14} />
+                </button>
                 <button onClick={() => handleDelete(e.id)} className="p-2 rounded-lg hover:bg-error/10 text-text-muted hover:text-error transition-colors">
                   <Trash2 size={14} />
                 </button>
@@ -215,7 +253,7 @@ function MoneyPageContent() {
           <div className="bg-surface border border-border rounded-2xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-[family-name:var(--font-display)] text-lg font-bold text-accent">
-                {modalKind === "income" ? "Money In" : "Nova Despesa"}
+                {editingEntry ? "Editar Entrada" : modalKind === "income" ? "Money In" : "Nova Despesa"}
               </h2>
               <button onClick={() => setShowModal(false)} className="p-1 hover:bg-card rounded-lg"><X size={20} className="text-text-muted" /></button>
             </div>

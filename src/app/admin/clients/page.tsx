@@ -76,7 +76,7 @@ export default function ClientsPage() {
       }).eq("id", editing.id);
     } else {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) { setSaving(false); return; }
       await supabase.from("clients").insert({
         id: crypto.randomUUID(),
         user_id: user.id,

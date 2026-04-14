@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Helper, HelperPayment } from "@/lib/types";
-import { HardHat, Plus, Pencil, Trash2, X, Phone, DollarSign, AlertTriangle } from "lucide-react";
+import { HardHat, Plus, Pencil, Trash2, X, Phone, DollarSign, AlertTriangle, ChevronDown } from "lucide-react";
 
 const taxStatusColors: Record<string, string> = {
   w9_received: "bg-success/20 text-success",
@@ -26,6 +26,7 @@ export default function HelpersPage() {
   const [helperForm, setHelperForm] = useState(emptyHelper);
   const [paymentForm, setPaymentForm] = useState(emptyPayment);
   const [saving, setSaving] = useState(false);
+  const [expandedHelper, setExpandedHelper] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -40,8 +41,9 @@ export default function HelpersPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  const currentYear = String(new Date().getFullYear());
   const totalPaidFor = (helperId: string) =>
-    payments.filter((p) => p.helper_id === helperId).reduce((s, p) => s + p.amount, 0);
+    payments.filter((p) => p.helper_id === helperId && p.date.startsWith(currentYear)).reduce((s, p) => s + p.amount, 0);
 
   const openNewHelper = () => { setEditing(null); setHelperForm(emptyHelper); setShowHelperModal(true); };
   const openEditHelper = (h: Helper) => {
@@ -64,7 +66,7 @@ export default function HelpersPage() {
       await supabase.from("helpers").update(payload).eq("id", editing.id);
     } else {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) { setSaving(false); return; }
       await supabase.from("helpers").insert({ id: crypto.randomUUID(), user_id: user.id, ...payload });
     }
     setSaving(false);
@@ -86,7 +88,7 @@ export default function HelpersPage() {
   const handleSavePayment = async () => {
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) { setSaving(false); return; }
     await supabase.from("helper_payments").insert({
       id: crypto.randomUUID(),
       user_id: user.id,
@@ -170,6 +172,9 @@ export default function HelpersPage() {
                     <button onClick={() => openPayment(h.id)} className="px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-bold hover:bg-accent/20 transition-colors">
                       + Payment
                     </button>
+                    <button onClick={() => setExpandedHelper(expandedHelper === h.id ? null : h.id)} className="p-2 rounded-lg hover:bg-card text-text-secondary hover:text-text transition-colors">
+                      <ChevronDown size={16} className={`transition-transform ${expandedHelper === h.id ? "rotate-180" : ""}`} />
+                    </button>
                     <button onClick={() => openEditHelper(h)} className="p-2 rounded-lg hover:bg-card text-text-secondary hover:text-secondary transition-colors">
                       <Pencil size={16} />
                     </button>
@@ -178,6 +183,31 @@ export default function HelpersPage() {
                     </button>
                   </div>
                 </div>
+                {/* Payment History */}
+                {expandedHelper === h.id && (() => {
+                  const helperPayments = payments.filter((p) => p.helper_id === h.id);
+                  return helperPayments.length > 0 ? (
+                    <div className="mt-3 border-t border-border pt-3">
+                      <p className="text-xs font-bold text-text-muted mb-2">Historico de Pagamentos</p>
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                        {helperPayments.map((p) => (
+                          <div key={p.id} className="flex items-center justify-between bg-card/50 rounded-lg px-3 py-2 text-xs">
+                            <div className="flex items-center gap-3">
+                              <span className="text-text-muted">{p.date}</span>
+                              {p.method && <span className="text-text-secondary bg-card px-2 py-0.5 rounded">{p.method}</span>}
+                              {p.notes && <span className="text-text-muted truncate max-w-[150px]">{p.notes}</span>}
+                            </div>
+                            <span className="font-bold text-accent">${p.amount.toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-3 border-t border-border pt-3">
+                      <p className="text-xs text-text-muted text-center py-2">Nenhum pagamento registrado</p>
+                    </div>
+                  );
+                })()}
               </div>
             );
           })}

@@ -42,7 +42,7 @@ export default function RecurringPage() {
 
   const handleMarkPaid = async (e: RecurringExpense) => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) { setSaving(false); return; }
     // Create money entry
     await supabase.from("money_entries").insert({
       id: crypto.randomUUID(),
@@ -115,7 +115,7 @@ export default function RecurringPage() {
       await supabase.from("recurring_expenses").update(payload).eq("id", editing.id);
     } else {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) { setSaving(false); return; }
       await supabase.from("recurring_expenses").insert({
         id: crypto.randomUUID(),
         user_id: user.id,
