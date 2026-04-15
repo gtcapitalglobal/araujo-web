@@ -106,6 +106,8 @@ export const USIG_PRICE_SHEET: PriceItem[] = [
   { code: '0162', description: 'Travel Over 50 Miles (per mile)', price: 1.00, unit: 'ea', category: 'Fees' },
   { code: '4811', description: 'Lead Safe Work Practices', price: 0.70, unit: 'ea', category: 'Fees' },
   { code: '5076', description: 'Ferry/Toll/Parking/Admin Fees', price: 1.00, unit: 'ea', category: 'Fees' },
+  // TRANSITION
+  { code: '9001', description: 'Transition Service', price: 20.00, unit: 'ea', category: 'Transition' },
 ];
 
 const priceMap = new Map<string, PriceItem>();
