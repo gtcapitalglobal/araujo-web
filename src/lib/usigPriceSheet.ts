@@ -110,17 +110,37 @@ export const USIG_PRICE_SHEET: PriceItem[] = [
   { code: '9001', description: 'Transition Service', price: 20.00, unit: 'ea', category: 'Transition' },
 ];
 
+// Custom items created by the user at runtime
+let customItems: PriceItem[] = [];
+let customCounter = 1;
+
+export function addCustomItem(description: string, price: number, unit = "ea", category = "Custom"): PriceItem {
+  const code = `C${String(customCounter++).padStart(3, "0")}`;
+  const item: PriceItem = { code, description, price, unit, category };
+  customItems.push(item);
+  return item;
+}
+
+export function getCustomItems(): PriceItem[] {
+  return customItems;
+}
+
+export function getAllItems(): PriceItem[] {
+  return [...USIG_PRICE_SHEET, ...customItems];
+}
+
 const priceMap = new Map<string, PriceItem>();
 USIG_PRICE_SHEET.forEach((item) => priceMap.set(item.code, item));
 
 export function lookupByCode(code: string): PriceItem | undefined {
-  return priceMap.get(code.trim());
+  return priceMap.get(code.trim()) || customItems.find((i) => i.code === code.trim());
 }
 
 export function searchItems(query: string): PriceItem[] {
   const q = query.toLowerCase().trim();
   if (!q) return [];
-  return USIG_PRICE_SHEET.filter(
+  const all = getAllItems();
+  return all.filter(
     (item) => item.code.includes(q) || item.description.toLowerCase().includes(q) || item.category.toLowerCase().includes(q)
   );
 }

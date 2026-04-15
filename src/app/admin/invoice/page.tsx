@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { USIG_PRICE_SHEET, lookupByCode, searchItems, type PriceItem } from "@/lib/usigPriceSheet";
+import { USIG_PRICE_SHEET, lookupByCode, searchItems, addCustomItem, getAllItems, type PriceItem } from "@/lib/usigPriceSheet";
 import { FileText, Plus, Trash2, Save, Download, Search, Tag, ArrowLeft, X, Table, LayoutGrid } from "lucide-react";
 
 interface InvoiceLine {
@@ -66,6 +66,9 @@ export default function InvoicePage() {
   const [showCatalog, setShowCatalog] = useState(false);
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogLineId, setCatalogLineId] = useState<string | null>(null);
+  const [showNewService, setShowNewService] = useState(false);
+  const [newService, setNewService] = useState({ description: "", price: "", unit: "ea" });
+  const [customVersion, setCustomVersion] = useState(0);
 
   const calcSub = (l: InvoiceLine) => (parseFloat(l.qty) || 0) * (parseFloat(l.unitPrice) || 0);
   const total = lines.reduce((s, l) => s + calcSub(l), 0);
@@ -288,6 +291,16 @@ export default function InvoicePage() {
       );
     }
     setShowCatalog(false);
+    setShowNewService(false);
+  };
+
+  const handleCreateService = () => {
+    const price = parseFloat(newService.price);
+    if (!newService.description.trim() || isNaN(price) || price <= 0) return;
+    const item = addCustomItem(newService.description.trim(), price, newService.unit);
+    setCustomVersion((v) => v + 1);
+    selectItem(item);
+    setNewService({ description: "", price: "", unit: "ea" });
   };
 
   // ===== Export PDF =====
@@ -309,7 +322,9 @@ export default function InvoicePage() {
     }
   };
 
-  const filtered = catalogSearch ? searchItems(catalogSearch) : USIG_PRICE_SHEET;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _cv = customVersion; // trigger re-render when custom items change
+  const filtered = catalogSearch ? searchItems(catalogSearch) : getAllItems();
 
   // ===== LIST MODE =====
   if (mode === "list") {
@@ -416,6 +431,55 @@ export default function InvoicePage() {
                 />
               </div>
             </div>
+            {/* New Service Form */}
+            {showNewService ? (
+              <div className="p-3 border-b border-primary/10 space-y-2">
+                <p className="text-accent text-xs font-bold">NOVO SERVICO</p>
+                <input
+                  className="bg-card border border-border rounded-lg w-full px-3 py-2 text-xs text-text outline-none focus:border-primary placeholder:text-text-muted"
+                  placeholder="Descricao do servico..."
+                  value={newService.description}
+                  onChange={(e) => setNewService({ ...newService, description: e.target.value })}
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="bg-card border border-border rounded-lg flex-1 px-3 py-2 text-xs text-text outline-none focus:border-primary placeholder:text-text-muted"
+                    placeholder="Valor ($)"
+                    value={newService.price}
+                    onChange={(e) => setNewService({ ...newService, price: e.target.value })}
+                  />
+                  <select
+                    value={newService.unit}
+                    onChange={(e) => setNewService({ ...newService, unit: e.target.value })}
+                    className="bg-card border border-border rounded-lg px-2 py-2 text-xs text-text outline-none focus:border-primary"
+                  >
+                    <option value="ea">ea</option>
+                    <option value="sq ft">sq ft</option>
+                    <option value="sq yd">sq yd</option>
+                    <option value="lf">lf</option>
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowNewService(false)} className="flex-1 border border-border rounded-lg py-2 text-xs text-text-muted hover:bg-card transition">Cancelar</button>
+                  <button
+                    onClick={handleCreateService}
+                    disabled={!newService.description.trim() || !newService.price}
+                    className="flex-1 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-lg py-2 text-xs hover:opacity-90 transition disabled:opacity-40"
+                  >
+                    Criar Servico
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="px-3 py-2 border-b border-primary/10">
+                <button onClick={() => setShowNewService(true)} className="flex items-center gap-2 text-accent text-xs font-bold hover:text-accent/80 transition">
+                  <Plus size={14} /> Criar novo servico
+                </button>
+              </div>
+            )}
             <div className="overflow-y-auto flex-1 p-2 space-y-0.5">
               {filtered.map((item) => (
                 <button
@@ -424,7 +488,7 @@ export default function InvoicePage() {
                   className="w-full flex items-center justify-between glass rounded-md px-2 py-1.5 hover:border-primary/40 transition text-left"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-primary font-black text-xs w-9">{item.code}</span>
+                    <span className={`font-black text-xs w-9 ${item.category === "Custom" ? "text-accent" : "text-primary"}`}>{item.code}</span>
                     <div>
                       <p className="text-text text-xs">{item.description}</p>
                       <p className="text-text-muted text-[9px]">{item.category}</p>
